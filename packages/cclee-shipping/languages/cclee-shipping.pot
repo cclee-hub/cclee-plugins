@@ -1,0 +1,160 @@
+# Copyright (C) 2026 CCLEE
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: CCLEE Shipping 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cclee-shipping\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-04-02T13:29:03+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: cclee-shipping\n"
+
+#. Plugin Name of the plugin
+#: cclee-shipping.php
+msgid "CCLEE Shipping"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: cclee-shipping.php
+msgid "https://github.com/cclee-hub/cclee-shipping"
+msgstr ""
+
+#. Description of the plugin
+#: cclee-shipping.php
+msgid "Multi-carrier shipping for WooCommerce. FedEx real-time rates + address validation."
+msgstr ""
+
+#. Author of the plugin
+#: cclee-shipping.php
+msgid "CCLEE"
+msgstr ""
+
+#. Author URI of the plugin
+#: cclee-shipping.php
+msgid "https://github.com/cclee-hub"
+msgstr ""
+
+#: includes/class-address-validator.php:29
+msgid "Country is required."
+msgstr ""
+
+#: includes/class-address-validator.php:34
+msgid "No FedEx shipping method configured."
+msgstr ""
+
+#: includes/class-fedex-carrier.php:135
+msgid "Unable to authenticate with FedEx."
+msgstr ""
+
+#: includes/class-fedex-carrier.php:169
+msgid "Address validation unavailable."
+msgstr ""
+
+#: includes/class-fedex-carrier.php:222
+msgid "Merchandise"
+msgstr ""
+
+#: includes/class-fedex-method.php:32
+msgid "FedEx (CCLEE Shipping)"
+msgstr ""
+
+#: includes/class-fedex-method.php:33
+msgid "FedEx real-time shipping rates via API."
+msgstr ""
+
+#: includes/class-fedex-method.php:62
+msgid "Method Title"
+msgstr ""
+
+#: includes/class-fedex-method.php:67
+msgid "API Key (Client ID)"
+msgstr ""
+
+#: includes/class-fedex-method.php:69
+msgid "FedEx Developer Portal API Key."
+msgstr ""
+
+#: includes/class-fedex-method.php:73
+msgid "Secret Key (Client Secret)"
+msgstr ""
+
+#: includes/class-fedex-method.php:75
+msgid "FedEx Developer Portal Secret Key."
+msgstr ""
+
+#: includes/class-fedex-method.php:79
+msgid "Account Number"
+msgstr ""
+
+#: includes/class-fedex-method.php:81
+msgid "FedEx account number."
+msgstr ""
+
+#: includes/class-fedex-method.php:85
+msgid "Environment"
+msgstr ""
+
+#: includes/class-fedex-method.php:89
+msgid "Sandbox"
+msgstr ""
+
+#: includes/class-fedex-method.php:90
+msgid "Production"
+msgstr ""
+
+#: includes/class-fedex-method.php:94
+msgid "Enabled Services"
+msgstr ""
+
+#: includes/class-fedex-method.php:101
+msgid "Rate Modifier Type"
+msgstr ""
+
+#: includes/class-fedex-method.php:105
+msgid "Fixed Amount"
+msgstr ""
+
+#: includes/class-fedex-method.php:106
+msgid "Percentage"
+msgstr ""
+
+#: includes/class-fedex-method.php:110
+msgid "Rate Modifier Value"
+msgstr ""
+
+#: includes/class-fedex-method.php:116
+msgid "Default Package Type"
+msgstr ""
+
+#: includes/class-fedex-method.php:120
+msgid "Your Packaging"
+msgstr ""
+
+#: includes/class-fedex-method.php:121
+msgid "FedEx Envelope"
+msgstr ""
+
+#: includes/class-fedex-method.php:122
+msgid "FedEx Pak"
+msgstr ""
+
+#: includes/class-fedex-method.php:123
+msgid "FedEx Box"
+msgstr ""
+
+#: includes/class-fedex-method.php:124
+msgid "FedEx Tube"
+msgstr ""
+
+#: includes/class-fedex-method.php:128
+msgid "Debug Mode"
+msgstr ""
+
+#: includes/class-fedex-method.php:130
+msgid "Enable logging"
+msgstr ""
