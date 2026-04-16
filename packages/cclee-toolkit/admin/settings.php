@@ -31,6 +31,9 @@ add_action( 'admin_init', function() {
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_api_key' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_enabled' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_case_study_enabled' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_provider' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_base_url' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_model' );
 
 	// 设置区域
 	add_settings_section(
@@ -59,7 +62,61 @@ add_action( 'admin_init', function() {
 		function() {
 			$value = get_option( 'cclee_toolkit_ai_api_key', '' );
 			echo '<input type="password" name="cclee_toolkit_ai_api_key" value="' . esc_attr( $value ) . '" class="regular-text">';
-			echo '<p class="description">OpenAI API key (or compatible)</p>';
+			echo '<p class="description">API Key for the selected provider below</p>';
+		},
+		'cclee-toolkit',
+		'cclee_toolkit_main'
+	);
+
+	// AI Provider 选择
+	add_settings_field(
+		'cclee_toolkit_ai_provider',
+		'AI Provider',
+		function() {
+			$value    = get_option( 'cclee_toolkit_ai_provider', 'openai' );
+			$providers = [
+				'openai'    => 'OpenAI',
+				'deepseek'  => 'DeepSeek',
+				'anthropic' => 'Anthropic (Claude)',
+				'custom'    => 'Custom (OpenAI-compatible)',
+			];
+			echo '<p class="description">Select AI service provider for content generation.</p>';
+		echo '<select name="cclee_toolkit_ai_provider" id="cclee_toolkit_ai_provider">';
+			foreach ( $providers as $key => $label ) {
+				printf(
+					'<option value="%s" %s>%s</option>',
+					esc_attr( $key ),
+					selected( $value, $key, false ),
+					esc_html( $label )
+				);
+			}
+			echo '</select>';
+		},
+		'cclee-toolkit',
+		'cclee_toolkit_main'
+	);
+
+	// AI API Base URL（Custom 时使用）
+	add_settings_field(
+		'cclee_toolkit_ai_base_url',
+		'API Base URL',
+		function() {
+			$value = get_option( 'cclee_toolkit_ai_base_url', '' );
+			echo '<input type="url" name="cclee_toolkit_ai_base_url" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="https://api.example.com/v1">';
+			echo '<p class="description">Only needed for Custom provider. Must end with <code>/v1</code>.</p>';
+		},
+		'cclee-toolkit',
+		'cclee_toolkit_main'
+	);
+
+	// AI Model
+	add_settings_field(
+		'cclee_toolkit_ai_model',
+		'AI Model',
+		function() {
+			$value = get_option( 'cclee_toolkit_ai_model', '' );
+			echo '<input type="text" name="cclee_toolkit_ai_model" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="e.g. gpt-4o-mini">';
+			echo '<p class="description">Leave empty for provider default. Examples: gpt-4o-mini, deepseek-chat, claude-haiku-4-5-20251001</p>';
 		},
 		'cclee-toolkit',
 		'cclee_toolkit_main'
