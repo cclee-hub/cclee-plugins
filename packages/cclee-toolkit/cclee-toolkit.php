@@ -42,4 +42,9 @@ add_action( 'plugins_loaded', function() {
 	if ( get_option( 'cclee_toolkit_case_study_enabled', true ) ) {
 		require_once CCLEE_TOOLKIT_PATH . 'modules/case-study/case-study.php';
 	}
+
+	// Case Study Blocks (shares toggle with CPT)
+	if ( get_option( 'cclee_toolkit_case_study_enabled', true ) ) {
+		require_once CCLEE_TOOLKIT_PATH . 'modules/case-study-blocks/module.php';
+	}
 } );

@@ -1,0 +1,9 @@
+{
+	"apiVersion": 3,
+	"name": "cclee-toolkit/case-metrics",
+	"title": "Case Study Metrics",
+	"description": "Results metrics display for case studies.",
+	"category": "cclee-toolkit",
+	"postTypes": ["case-study"],
+	"render": "file:./render.php"
+}
