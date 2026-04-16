@@ -18,3 +18,12 @@ Do not edit directly.
 ## Migration Notes
 
 - `cclee-toolkit` migrated from standalone [cclee-hub/cclee-toolkit](https://github.com/cclee-hub/cclee-toolkit) (archived)
+
+## About the Author
+
+| Platform | Link |
+|----------|------|
+| Chinese Site | https://www.aigent.ren/about |
+| English Site | https://aidevhub.ai/about |
+| Upwork | https://www.upwork.com/freelancers/~010ab5ec29d8f4ff3f |
+| LinkedIn | https://www.linkedin.com/in/cc-lee-9b0b113bb/ |
