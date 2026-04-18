@@ -1,9 +1,0 @@
-{
-	"apiVersion": 3,
-	"name": "cclee-toolkit/case-meta",
-	"title": "Case Study Meta",
-	"description": "Project details bar for case studies.",
-	"category": "cclee-toolkit",
-	"postTypes": ["case-study"],
-	"render": "file:./render.php"
-}

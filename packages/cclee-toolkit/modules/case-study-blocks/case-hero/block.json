@@ -1,9 +1,0 @@
-{
-	"apiVersion": 3,
-	"name": "cclee-toolkit/case-hero",
-	"title": "Case Study Hero",
-	"description": "Client information header for case studies.",
-	"category": "cclee-toolkit",
-	"postTypes": ["case-study"],
-	"render": "file:./render.php"
-}

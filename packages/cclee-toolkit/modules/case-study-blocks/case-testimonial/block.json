@@ -1,9 +1,0 @@
-{
-	"apiVersion": 3,
-	"name": "cclee-toolkit/case-testimonial",
-	"title": "Case Study Testimonial",
-	"description": "Client testimonial for case studies.",
-	"category": "cclee-toolkit",
-	"postTypes": ["case-study"],
-	"render": "file:./render.php"
-}
