@@ -1,0 +1,14 @@
+/* CCLEE Shipping Admin */
+.cclee-shipping-method-settings .wc-enhanced-select {
+	min-width: 250px;
+}
+.cclee-av-notice {
+	display: block;
+	padding: 8px 12px;
+	margin: 4px 0;
+	background: #fff3cd;
+	border: 1px solid #ffc107;
+	border-radius: 4px;
+	font-size: 13px;
+	color: #856404;
+}
