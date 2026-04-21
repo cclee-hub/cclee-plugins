@@ -47,4 +47,9 @@ add_action( 'plugins_loaded', function() {
 	if ( get_option( 'cclee_toolkit_case_study_enabled', true ) ) {
 		require_once CCLEE_TOOLKIT_PATH . 'modules/case-study-blocks/module.php';
 	}
+
+	// WooCommerce Enhancer
+	if ( get_option( 'cclee_toolkit_woo_schema_enabled', true ) ) {
+		require_once CCLEE_TOOLKIT_PATH . 'modules/woo/woo.php';
+	}
 } );

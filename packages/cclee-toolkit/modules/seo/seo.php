@@ -16,10 +16,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * 输出 Open Graph 和 Twitter Card 标签
+ *
+ * Controlled by:
+ * - cclee_toolkit_seo_enabled       (master switch)
+ * - cclee_toolkit_seo_og_enabled    (OG output)
  */
 add_action( 'wp_head', function () {
-	// 仅在前端输出
+	// 仅前端输出
 	if ( is_admin() ) {
+		return;
+	}
+	if ( ! get_option( 'cclee_toolkit_seo_enabled', true ) || ! get_option( 'cclee_toolkit_seo_og_enabled', true ) ) {
 		return;
 	}
 
@@ -103,9 +110,16 @@ add_action( 'wp_head', function () {
 
 /**
  * 输出基础 JSON-LD Schema
+ *
+ * Controlled by:
+ * - cclee_toolkit_seo_enabled         (master switch)
+ * - cclee_toolkit_seo_jsonld_enabled  (JSON-LD output)
  */
 add_action( 'wp_head', function () {
 	if ( is_admin() || ! is_singular() ) {
+		return;
+	}
+	if ( ! get_option( 'cclee_toolkit_seo_enabled', true ) || ! get_option( 'cclee_toolkit_seo_jsonld_enabled', true ) ) {
 		return;
 	}
 
