@@ -280,7 +280,7 @@ function cclee_toolkit_render_woo(): void {
 						<?php esc_html_e( 'Enable WooCommerce Product Schema (structured data for rich results)', 'cclee-toolkit' ); ?>
 					</label>
 				</fieldset>
-				<p class="description"><?php esc_html_e( 'Outputs Product schema (name, image, price, availability, reviews) on single product pages.', 'cclee-toolkit' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Outputs Product schema (name, image, SKU, GTIN, MPN, brand, price, availability, reviews) and BreadcrumbList on single product pages. Supports variable products.', 'cclee-toolkit' ); ?></p>
 			</td>
 		</tr>
 	</table>
