@@ -36,6 +36,16 @@ add_action( 'plugins_loaded', function() {
 	// SEO Enhancer
 	if ( get_option( 'cclee_toolkit_seo_enabled', true ) ) {
 		require_once CCLEE_TOOLKIT_PATH . 'modules/seo/seo.php';
+
+		// IndexNow (sub-module, depends on SEO master switch)
+		if ( get_option( 'cclee_toolkit_seo_indexnow_enabled', false ) ) {
+			require_once CCLEE_TOOLKIT_PATH . 'modules/seo/indexnow.php';
+		}
+
+		// Google Indexing API (sub-module, depends on SEO master switch)
+		if ( get_option( 'cclee_toolkit_seo_google_indexing_enabled', false ) ) {
+			require_once CCLEE_TOOLKIT_PATH . 'modules/seo/google-indexing.php';
+		}
 	}
 
 	// Case Study CPT

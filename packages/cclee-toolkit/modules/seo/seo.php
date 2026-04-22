@@ -15,6 +15,54 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * 输出站点验证码 meta 标签
+ *
+ * Controlled by:
+ * - cclee_toolkit_seo_enabled (master switch)
+ * - cclee_toolkit_seo_verify_google / bing / yandex
+ */
+add_action( 'wp_head', function () {
+	if ( is_admin() ) {
+		return;
+	}
+	if ( ! get_option( 'cclee_toolkit_seo_enabled', true ) ) {
+		return;
+	}
+
+	$tags = array(
+		'google' => array(
+			'option' => 'cclee_toolkit_seo_verify_google',
+			'name'   => 'google-site-verification',
+		),
+		'bing'   => array(
+			'option' => 'cclee_toolkit_seo_verify_bing',
+			'name'   => 'msvalidate.01',
+		),
+		'yandex' => array(
+			'option' => 'cclee_toolkit_seo_verify_yandex',
+			'name'   => 'yandex-verification',
+		),
+	);
+
+	$output = '';
+	foreach ( $tags as $tag ) {
+		$value = get_option( $tag['option'], '' );
+		if ( $value ) {
+			$output .= sprintf(
+				'<meta name="%s" content="%s" />' . "\n",
+				esc_attr( $tag['name'] ),
+				esc_attr( $value )
+			);
+		}
+	}
+
+	if ( $output ) {
+		echo "\n<!-- CCLEE Toolkit: Site Verification -->\n";
+		echo $output;
+	}
+}, 0 );
+
+/**
  * 输出 Open Graph 和 Twitter Card 标签
  *
  * Controlled by:

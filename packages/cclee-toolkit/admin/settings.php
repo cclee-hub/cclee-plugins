@@ -46,6 +46,13 @@ add_action( 'admin_init', function() {
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_enabled' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_og_enabled' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_jsonld_enabled' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_google' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_bing' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_yandex' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_indexnow_enabled' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_indexnow_key' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_google_indexing_enabled' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_google_service_account' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_case_study_enabled' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_woo_schema_enabled' );
 } );
@@ -239,6 +246,80 @@ function cclee_toolkit_render_seo(): void {
 		</tr>
 
 		<tr>
+			<th scope="row"><?php esc_html_e( 'Site Verification', 'cclee-toolkit' ); ?></th>
+			<td>
+				<p>
+					<input type="text" name="cclee_toolkit_seo_verify_google"
+						value="<?php echo esc_attr( get_option( 'cclee_toolkit_seo_verify_google', '' ) ); ?>"
+						class="regular-text" placeholder="e.g. abc123def456">
+					<label><?php esc_html_e( 'Google Search Console', 'cclee-toolkit' ); ?></label>
+				</p>
+				<p>
+					<input type="text" name="cclee_toolkit_seo_verify_bing"
+						value="<?php echo esc_attr( get_option( 'cclee_toolkit_seo_verify_bing', '' ) ); ?>"
+						class="regular-text" placeholder="e.g. ABCDEF1234567890...">
+					<label><?php esc_html_e( 'Bing Webmaster Tools', 'cclee-toolkit' ); ?></label>
+				</p>
+				<p>
+					<input type="text" name="cclee_toolkit_seo_verify_yandex"
+						value="<?php echo esc_attr( get_option( 'cclee_toolkit_seo_verify_yandex', '' ) ); ?>"
+						class="regular-text" placeholder="e.g. a1b2c3d4">
+					<label><?php esc_html_e( 'Yandex Webmaster', 'cclee-toolkit' ); ?></label>
+				</p>
+				<p class="description"><?php esc_html_e( 'Paste verification codes from search engine webmaster tools. These meta tags are output site-wide when SEO module is enabled.', 'cclee-toolkit' ); ?></p>
+			</td>
+		</tr>
+
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Indexing', 'cclee-toolkit' ); ?></th>
+			<td>
+				<fieldset>
+					<label>
+						<input type="checkbox" name="cclee_toolkit_seo_indexnow_enabled" value="1"
+							<?php checked( get_option( 'cclee_toolkit_seo_indexnow_enabled', false ), true ); ?>>
+						<?php esc_html_e( 'Enable IndexNow — auto-notify search engines when content is published', 'cclee-toolkit' ); ?>
+					</label>
+				</fieldset>
+				<p style="margin-top:1em;">
+					<input type="text" name="cclee_toolkit_seo_indexnow_key" id="cclee_toolkit_seo_indexnow_key"
+						value="<?php echo esc_attr( get_option( 'cclee_toolkit_seo_indexnow_key', '' ) ); ?>"
+						class="regular-text" placeholder="<?php esc_attr_e( 'Auto-generated on first use, or paste your own', 'cclee-toolkit' ); ?>">
+					<button type="button" class="button" id="cclee-indexnow-generate">
+						<?php esc_html_e( 'Generate Key', 'cclee-toolkit' ); ?>
+					</button>
+				</p>
+				<?php
+				$indexnow_key = get_option( 'cclee_toolkit_seo_indexnow_key', '' );
+				if ( $indexnow_key ) :
+					$key_url = home_url( '/' . $indexnow_key . '.txt' );
+					?>
+					<p class="description">
+						<?php printf( esc_html__( 'Key file hosted at: %s', 'cclee-toolkit' ), '<code>' . esc_url( $key_url ) . '</code>' ); ?>
+					</p>
+				<?php endif; ?>
+
+				<hr style="margin:1.5em 0;">
+				<h4 style="margin-bottom:0.5em;"><?php esc_html_e( 'Google Indexing API', 'cclee-toolkit' ); ?></h4>
+				<fieldset>
+					<label>
+						<input type="checkbox" name="cclee_toolkit_seo_google_indexing_enabled" value="1"
+							<?php checked( get_option( 'cclee_toolkit_seo_google_indexing_enabled', false ), true ); ?>>
+						<?php esc_html_e( 'Enable Google Indexing API — push URLs directly to Google Index', 'cclee-toolkit' ); ?>
+					</label>
+				</fieldset>
+				<p style="margin-top:1em;">
+					<textarea name="cclee_toolkit_seo_google_service_account" rows="5"
+						class="large-text code" placeholder="<?php esc_attr_e( 'Paste Service Account JSON from Google Cloud Console', 'cclee-toolkit' ); ?>"><?php echo esc_textarea( get_option( 'cclee_toolkit_seo_google_service_account', '' ) ); ?></textarea>
+				</p>
+				<p class="description">
+					<?php esc_html_e( 'Create a Service Account in Google Cloud Console, enable Indexing API, and grant it "Site owner" permission in Search Console. Then paste the JSON key file content above.', 'cclee-toolkit' ); ?>
+				</p>
+
+				<?php cclee_toolkit_render_indexing_log(); ?>
+			</td>
+		</tr>
+
+		<tr>
 			<th scope="row"><?php esc_html_e( 'Open Graph', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
@@ -256,6 +337,66 @@ function cclee_toolkit_render_seo(): void {
 				</fieldset>
 			</td>
 		</tr>
+	</table>
+	<?php
+}
+
+/**
+ * IndexNow Generate Key JS + Log rendering
+ */
+add_action( 'admin_footer', function() {
+	if ( ! is_admin() || ! isset( $_GET['page'] ) || 'cclee-toolkit' !== $_GET['page'] ) {
+		return;
+	}
+	?>
+	<script>
+	(function() {
+		var btn = document.getElementById('cclee-indexnow-generate');
+		if (!btn) return;
+		btn.addEventListener('click', function() {
+			var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+			var key = '';
+			for (var i = 0; i < 32; i++) {
+				key += chars.charAt(Math.floor(Math.random() * chars.length));
+			}
+			document.getElementById('cclee_toolkit_seo_indexnow_key').value = key;
+		});
+	})();
+	</script>
+	<?php
+} );
+
+/**
+ * 渲染 Indexing 日志表格（IndexNow + Google Indexing API 共用）
+ */
+function cclee_toolkit_render_indexing_log(): void {
+	$log = get_option( 'cclee_toolkit_indexing_log', array() );
+	if ( empty( $log ) ) {
+		return;
+	}
+	$recent = array_slice( $log, 0, 20 );
+	?>
+	<table class="widefat striped" style="margin-top:1em; max-width:750px;">
+		<thead>
+			<tr>
+				<th><?php esc_html_e( 'Source', 'cclee-toolkit' ); ?></th>
+				<th><?php esc_html_e( 'URL', 'cclee-toolkit' ); ?></th>
+				<th><?php esc_html_e( 'Status', 'cclee-toolkit' ); ?></th>
+				<th><?php esc_html_e( 'HTTP Code', 'cclee-toolkit' ); ?></th>
+				<th><?php esc_html_e( 'Time', 'cclee-toolkit' ); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach ( $recent as $entry ) : ?>
+			<tr>
+				<td><code><?php echo esc_html( $entry['source'] ?? 'indexnow' ); ?></code></td>
+				<td style="word-break:break-all;"><?php echo esc_html( $entry['url'] ); ?></td>
+				<td><?php echo 'success' === $entry['status'] ? '<span style="color:green;">' . esc_html__( 'Success', 'cclee-toolkit' ) . '</span>' : '<span style="color:red;">' . esc_html__( 'Fail', 'cclee-toolkit' ) . '</span>'; ?></td>
+				<td><?php echo esc_html( $entry['response_code'] ); ?></td>
+				<td><?php echo esc_html( date_i18n( 'Y-m-d H:i', $entry['timestamp'] ) ); ?></td>
+			</tr>
+		<?php endforeach; ?>
+		</tbody>
 	</table>
 	<?php
 }
