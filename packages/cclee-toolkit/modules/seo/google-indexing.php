@@ -50,6 +50,13 @@ function cclee_toolkit_google_get_access_token() {
 
 	$credentials = cclee_toolkit_google_get_credentials();
 	if ( ! $credentials ) {
+		cclee_toolkit_indexing_log_entry(
+			home_url( '/' ),
+			'fail',
+			0,
+			'google',
+			'auth_error: invalid or missing Service Account JSON'
+		);
 		return false;
 	}
 
