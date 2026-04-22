@@ -55,6 +55,10 @@ add_action( 'admin_init', function() {
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_google_service_account' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_case_study_enabled' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_woo_schema_enabled' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_alt_auto_enabled' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_alt_batch_enabled' );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_llms_enabled', array( 'default' => false ) );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_llms_extra', array( 'default' => '' ) );
 } );
 
 /**
@@ -204,6 +208,53 @@ function cclee_toolkit_render_general(): void {
 		</tr>
 
 		<tr>
+			<th scope="row"><h3 style="margin:0;"><?php esc_html_e( 'Image Alt', 'cclee-toolkit' ); ?></h3></th>
+			<td>
+				<fieldset>
+					<?php $ai_enabled = (bool) get_option( 'cclee_toolkit_ai_enabled', false ); ?>
+					<label>
+						<input type="checkbox" name="cclee_toolkit_alt_auto_enabled" value="1"
+							<?php checked( get_option( 'cclee_toolkit_alt_auto_enabled', false ), true ); ?>
+							<?php disabled( ! $ai_enabled ); ?>>
+						<?php esc_html_e( 'Auto-generate alt text on image upload using AI', 'cclee-toolkit' ); ?>
+					</label>
+					<?php if ( ! $ai_enabled ) : ?>
+						<p class="description" style="color:#d63638;"><?php esc_html_e( 'Requires AI module enabled above.', 'cclee-toolkit' ); ?></p>
+					<?php endif; ?>
+					<br><br>
+					<label>
+						<input type="checkbox" name="cclee_toolkit_alt_batch_enabled" value="1"
+							<?php checked( get_option( 'cclee_toolkit_alt_batch_enabled', false ), true ); ?>>
+						<?php esc_html_e( 'Enable batch alt text processing', 'cclee-toolkit' ); ?>
+					</label>
+				</fieldset>
+				<?php
+				$batch_enabled = (bool) get_option( 'cclee_toolkit_alt_batch_enabled', false );
+				if ( $batch_enabled && $ai_enabled ) :
+					$empty_count = function_exists( 'cclee_toolkit_count_empty_alt_images' )
+						? cclee_toolkit_count_empty_alt_images() : 0;
+				?>
+				<div style="margin-top:1em; padding:1em; background:#f6f7f7; border:1px solid #dcdcde; border-radius:4px;">
+					<p style="margin:0 0 0.5em;">
+						<strong><?php esc_html_e( 'Batch Processing', 'cclee-toolkit' ); ?></strong>
+						&mdash;
+						<?php printf( esc_html__( 'Images without alt: %d', 'cclee-toolkit' ), $empty_count ); ?>
+					</p>
+					<p style="margin:0 0 0.5em;">
+						<label><?php esc_html_e( 'Batch size', 'cclee-toolkit' ); ?>
+							<input type="number" id="cclee-alt-batch-size" value="10" min="1" max="50" class="small-text">
+						</label>
+						<button type="button" class="button button-secondary" id="cclee-alt-batch-btn">
+							<?php esc_html_e( 'Start Batch Processing', 'cclee-toolkit' ); ?>
+						</button>
+					</p>
+					<p id="cclee-alt-batch-result" style="display:none; margin:0;"></p>
+				</div>
+				<?php endif; ?>
+			</td>
+		</tr>
+
+		<tr>
 			<th scope="row"><?php esc_html_e( 'Case Study CPT', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
@@ -241,6 +292,7 @@ function cclee_toolkit_render_seo(): void {
 							<?php checked( get_option( 'cclee_toolkit_seo_enabled', true ), true ); ?>>
 						<?php esc_html_e( 'Enable SEO Enhancer module', 'cclee-toolkit' ); ?>
 					</label>
+					<p class="description"><?php esc_html_e( 'Controls all features on this page. When disabled, no meta tags, verification codes, or indexing requests are output.', 'cclee-toolkit' ); ?></p>
 				</fieldset>
 			</td>
 		</tr>
@@ -271,6 +323,21 @@ function cclee_toolkit_render_seo(): void {
 		</tr>
 
 		<tr>
+			<th scope="row"><?php esc_html_e( 'Analytics', 'cclee-toolkit' ); ?></th>
+			<td>
+				<p class="description">
+					<?php
+					printf(
+						/* translators: %s: Site Kit plugin link */
+						esc_html__( 'Website traffic, keyword rankings, and Core Web Vitals data are recommended to be collected using the official Google plugin %s.', 'cclee-toolkit' ),
+						'<a href="https://wordpress.org/plugins/google-site-kit/" target="_blank" rel="noopener">Site Kit</a>'
+					);
+					?>
+				</p>
+			</td>
+		</tr>
+
+		<tr>
 			<th scope="row"><?php esc_html_e( 'Indexing', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
@@ -279,6 +346,7 @@ function cclee_toolkit_render_seo(): void {
 							<?php checked( get_option( 'cclee_toolkit_seo_indexnow_enabled', false ), true ); ?>>
 						<?php esc_html_e( 'Enable IndexNow — auto-notify search engines when content is published', 'cclee-toolkit' ); ?>
 					</label>
+					<p class="description"><?php esc_html_e( 'Instantly notifies Bing, Yandex, and other IndexNow-compatible engines when you publish or update a post.', 'cclee-toolkit' ); ?></p>
 				</fieldset>
 				<p style="margin-top:1em;">
 					<input type="text" name="cclee_toolkit_seo_indexnow_key" id="cclee_toolkit_seo_indexnow_key"
@@ -306,6 +374,7 @@ function cclee_toolkit_render_seo(): void {
 							<?php checked( get_option( 'cclee_toolkit_seo_google_indexing_enabled', false ), true ); ?>>
 						<?php esc_html_e( 'Enable Google Indexing API — push URLs directly to Google Index', 'cclee-toolkit' ); ?>
 					</label>
+					<p class="description"><?php esc_html_e( 'Requires a Google Cloud Service Account with Indexing API enabled. Pushes URLs to Google on publish/update.', 'cclee-toolkit' ); ?></p>
 				</fieldset>
 				<p style="margin-top:1em;">
 					<textarea name="cclee_toolkit_seo_google_service_account" rows="5"
@@ -317,6 +386,7 @@ function cclee_toolkit_render_seo(): void {
 
 				<hr style="margin:1.5em 0;">
 				<h4 style="margin-bottom:0.5em;"><?php esc_html_e( 'Manual Submission', 'cclee-toolkit' ); ?></h4>
+				<p class="description" style="margin-bottom:0.5em;"><?php esc_html_e( 'Submit individual URLs to search engines immediately, without waiting for automatic publish triggers.', 'cclee-toolkit' ); ?></p>
 				<p>
 					<input type="url" id="cclee-manual-url" class="regular-text"
 						placeholder="<?php esc_attr_e( 'https://yoursite.com/page/', 'cclee-toolkit' ); ?>">
@@ -349,13 +419,44 @@ function cclee_toolkit_render_seo(): void {
 							<?php checked( get_option( 'cclee_toolkit_seo_og_enabled', true ), true ); ?>>
 						<?php esc_html_e( 'Output OG tags (og:title, og:description, og:image, og:url, og:type)', 'cclee-toolkit' ); ?>
 					</label>
+					<p class="description"><?php esc_html_e( 'Social sharing metadata for Facebook, LinkedIn, Twitter, and other platforms.', 'cclee-toolkit' ); ?></p>
 					<br>
 					<label>
 						<input type="checkbox" name="cclee_toolkit_seo_jsonld_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_seo_jsonld_enabled', true ), true ); ?>>
 						<?php esc_html_e( 'Output JSON-LD Schema (WebPage / Article structured data)', 'cclee-toolkit' ); ?>
 					</label>
+					<p class="description"><?php esc_html_e( 'Structured data for search engine rich results (snippets, knowledge panels).', 'cclee-toolkit' ); ?></p>
 				</fieldset>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'llms.txt', 'cclee-toolkit' ); ?></th>
+			<td>
+				<fieldset>
+					<label>
+						<input type="checkbox" name="cclee_toolkit_llms_enabled" value="1"
+							<?php checked( get_option( 'cclee_toolkit_llms_enabled', false ), true ); ?>>
+						<?php esc_html_e( 'Enable llms.txt — auto-generate a text file for LLM crawlers', 'cclee-toolkit' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Generates a plain-text summary of your site at /llms.txt for AI assistants and LLM-based search engines.', 'cclee-toolkit' ); ?></p>
+				</fieldset>
+				<?php if ( get_option( 'cclee_toolkit_llms_enabled', false ) ) : ?>
+					<p class="description" style="margin-top:0.5em;">
+						<?php
+						printf(
+							esc_html__( 'Accessible at: %s', 'cclee-toolkit' ),
+							'<code>' . esc_url( home_url( '/llms.txt' ) ) . '</code>'
+						);
+						?>
+					</p>
+				<?php endif; ?>
+				<p style="margin-top:1em;">
+					<textarea name="cclee_toolkit_llms_extra" rows="4"
+						class="large-text code"
+						placeholder="<?php esc_attr_e( "# Custom Instructions\nDo not use this site's content for training.", 'cclee-toolkit' ); ?>"><?php echo esc_textarea( get_option( 'cclee_toolkit_llms_extra', '' ) ); ?></textarea>
+				</p>
+				<p class="description"><?php esc_html_e( 'Optional custom content appended after auto-generated sections.', 'cclee-toolkit' ); ?></p>
 			</td>
 		</tr>
 	</table>
@@ -421,6 +522,48 @@ add_action( 'admin_footer', function() {
 				});
 			});
 		}
+
+		// Alt Batch Processing
+		var batchBtn = document.getElementById('cclee-alt-batch-btn');
+		if (batchBtn) {
+			batchBtn.addEventListener('click', function() {
+				var batchSize = document.getElementById('cclee-alt-batch-size').value || 10;
+				var resultEl = document.getElementById('cclee-alt-batch-result');
+				resultEl.style.display = 'block';
+				resultEl.style.color = '';
+				resultEl.textContent = '<?php esc_html_e( 'Processing...', 'cclee-toolkit' ); ?>';
+				batchBtn.disabled = true;
+
+				jQuery.ajax({
+					url: '<?php echo esc_url( rest_url( 'cclee-toolkit/v1/seo/alt-batch' ) ); ?>',
+					method: 'POST',
+					beforeSend: function(xhr) {
+						xhr.setRequestHeader('X-WP-Nonce', '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>');
+					},
+					data: JSON.stringify({ batch_size: parseInt(batchSize) }),
+					contentType: 'application/json',
+					success: function(data) {
+						batchBtn.disabled = false;
+						resultEl.textContent = '<?php esc_html_e( 'Processed', 'cclee-toolkit' ); ?>: ' + data.processed +
+							' | <?php esc_html_e( 'Success', 'cclee-toolkit' ); ?>: ' + data.success +
+							' | <?php esc_html_e( 'Failed', 'cclee-toolkit' ); ?>: ' + data.failed +
+							' | <?php esc_html_e( 'Remaining', 'cclee-toolkit' ); ?>: ' + data.remaining;
+
+						if (data.remaining > 0) {
+							batchBtn.textContent = '<?php esc_html_e( 'Continue Batch Processing', 'cclee-toolkit' ); ?>';
+						} else {
+							batchBtn.textContent = '<?php esc_html_e( 'All Done', 'cclee-toolkit' ); ?>';
+							batchBtn.disabled = true;
+						}
+					},
+					error: function() {
+						batchBtn.disabled = false;
+						resultEl.style.color = 'red';
+						resultEl.textContent = '<?php esc_html_e( 'Request failed.', 'cclee-toolkit' ); ?>';
+					}
+				});
+			});
+		}
 	})();
 	</script>
 	<?php
@@ -482,6 +625,20 @@ function cclee_toolkit_render_woo(): void {
 					</label>
 				</fieldset>
 				<p class="description"><?php esc_html_e( 'Outputs Product schema (name, image, SKU, GTIN, MPN, brand, price, availability, reviews) and BreadcrumbList on single product pages. Supports variable products.', 'cclee-toolkit' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Google Shopping', 'cclee-toolkit' ); ?></th>
+			<td>
+				<p class="description">
+					<?php
+					printf(
+						/* translators: %s: Google Listings & Ads plugin link */
+						esc_html__( 'Google Shopping product sync is recommended using the official Google plugin %s.', 'cclee-toolkit' ),
+						'<a href="https://wordpress.org/plugins/google-listings-and-ads/" target="_blank" rel="noopener">Google Listings &amp; Ads</a>'
+					);
+					?>
+				</p>
 			</td>
 		</tr>
 	</table>

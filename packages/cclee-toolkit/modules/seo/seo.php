@@ -87,8 +87,8 @@ add_action( 'wp_head', function () {
 
 	// 单页/文章
 	if ( is_singular() ) {
-		$title = get_the_title();
-		$desc  = get_the_excerpt() ?: wp_trim_words( get_the_content(), 55 );
+		$title = get_post_meta( get_the_ID(), 'cclee_seo_meta_title', true ) ?: get_the_title();
+		$desc  = get_post_meta( get_the_ID(), 'cclee_seo_meta_description', true ) ?: ( get_the_excerpt() ?: wp_trim_words( get_the_content(), 55 ) );
 		$url   = get_permalink();
 
 		if ( has_post_thumbnail() ) {
@@ -231,7 +231,7 @@ add_action( 'wp_head', function () {
 	$schema = [
 		'@context' => 'https://schema.org',
 		'@type'    => is_page() ? 'WebPage' : 'Article',
-		'headline' => get_the_title(),
+		'headline' => get_post_meta( get_the_ID(), 'cclee_seo_meta_title', true ) ?: get_the_title(),
 		'url'      => get_permalink(),
 		'datePublished' => get_the_date( 'c' ),
 		'dateModified'  => get_the_modified_date( 'c' ),
@@ -255,3 +255,64 @@ add_action( 'wp_head', function () {
 		wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES )
 	);
 }, 2 );
+
+/**
+ * 输出自定义 <title>、<meta name="description">、<meta name="robots">
+ *
+ * 仅在 singular 页面且对应 post_meta 有值时输出。
+ */
+add_action( 'wp_head', function () {
+	if ( is_admin() || ! is_singular() ) {
+		return;
+	}
+	if ( ! get_option( 'cclee_toolkit_seo_enabled', true ) ) {
+		return;
+	}
+
+	$post_id = get_the_ID();
+
+	// <title> — 自定义 meta title 覆盖主题默认
+	$meta_title = get_post_meta( $post_id, 'cclee_seo_meta_title', true );
+	if ( $meta_title ) {
+		echo "\n<!-- CCLEE Toolkit: SEO Meta -->\n";
+		// Override document title via wp_title / document_title_parts filter
+		add_filter( 'document_title_parts', function ( $parts ) use ( $meta_title ) {
+			$parts['title'] = $meta_title;
+			return $parts;
+		} );
+	}
+
+	// <meta name="description">
+	$meta_desc = get_post_meta( $post_id, 'cclee_seo_meta_description', true );
+	if ( $meta_desc ) {
+		if ( ! $meta_title ) {
+			echo "\n<!-- CCLEE Toolkit: SEO Meta -->\n";
+		}
+		printf(
+			'<meta name="description" content="%s" />' . "\n",
+			esc_attr( mb_substr( $meta_desc, 0, 155 ) )
+		);
+	}
+
+	// <meta name="robots">
+	$noindex  = get_post_meta( $post_id, 'cclee_seo_robots_noindex', true );
+	$nofollow = get_post_meta( $post_id, 'cclee_seo_robots_nofollow', true );
+
+	if ( $noindex || $nofollow ) {
+		$directives = array();
+		if ( $noindex ) {
+			$directives[] = 'noindex';
+		}
+		if ( $nofollow ) {
+			$directives[] = 'nofollow';
+		}
+		if ( ! $meta_title && ! $meta_desc ) {
+			echo "\n<!-- CCLEE Toolkit: SEO Meta -->\n";
+		}
+		printf(
+			'<meta name="robots" content="%s" />' . "\n",
+			esc_attr( implode( ', ', $directives ) )
+		)
+		;
+	}
+}, 1 );
