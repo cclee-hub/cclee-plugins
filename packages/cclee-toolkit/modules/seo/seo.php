@@ -91,7 +91,11 @@ add_action( 'wp_head', function () {
 	printf( '<meta property="og:title" content="%s" />' . "\n", $title );
 	printf( '<meta property="og:description" content="%s" />' . "\n", $desc );
 	printf( '<meta property="og:url" content="%s" />' . "\n", $url );
-	printf( '<meta property="og:type" content="%s" />' . "\n", esc_attr( $type ) );
+	// og:type: defer to product-specific output on product pages
+	$is_product_page = function_exists( 'is_product' ) && is_product();
+	if ( ! $is_product_page ) {
+		printf( '<meta property="og:type" content="%s" />' . "\n", esc_attr( $type ) );
+	}
 
 	if ( $image ) {
 		printf( '<meta property="og:image" content="%s" />' . "\n", $image );
@@ -104,6 +108,59 @@ add_action( 'wp_head', function () {
 
 	if ( $image ) {
 		printf( '<meta name="twitter:image" content="%s" />' . "\n", $image );
+	}
+
+	// WooCommerce Product OG extension
+	if ( function_exists( 'is_product' ) && is_product() ) {
+		global $product;
+		if ( $product ) {
+			$product_id = $product->get_id();
+
+			// Override og:type for product pages
+			printf( '<meta property="og:type" content="product" />' . "\n" );
+
+			// og:price:amount
+			if ( $product->is_type( 'variable' ) ) {
+				$min_price = $product->get_variation_price( 'min', true );
+				if ( $min_price !== '' ) {
+					printf( '<meta property="og:price:amount" content="%s" />' . "\n", esc_attr( $min_price ) );
+				}
+			} else {
+				$price = $product->get_price();
+				if ( $price !== '' ) {
+					printf( '<meta property="og:price:amount" content="%s" />' . "\n", esc_attr( $price ) );
+				}
+			}
+
+			// og:price:currency
+			printf( '<meta property="og:price:currency" content="%s" />' . "\n", esc_attr( get_woocommerce_currency() ) );
+
+			// og:availability
+			$availability = $product->is_in_stock() ? 'instock' : 'oos';
+			printf( '<meta property="og:availability" content="%s" />' . "\n", esc_attr( $availability ) );
+
+			// og:brand (same logic as Woo Schema module)
+			$brand = '';
+			$brand_terms = get_the_terms( $product_id, 'product_brand' );
+			if ( $brand_terms && ! is_wp_error( $brand_terms ) ) {
+				$brand = $brand_terms[0]->name;
+			}
+			if ( ! $brand ) {
+				$brand_meta = get_post_meta( $product_id, '_brand', true );
+				if ( $brand_meta ) {
+					$brand = sanitize_text_field( $brand_meta );
+				}
+			}
+			if ( $brand ) {
+				printf( '<meta property="og:brand" content="%s" />' . "\n", esc_attr( $brand ) );
+			}
+
+			// og:sku
+			$sku = get_post_meta( $product_id, '_sku', true );
+			if ( $sku ) {
+				printf( '<meta property="og:sku" content="%s" />' . "\n", esc_attr( $sku ) );
+			}
+		}
 	}
 }, 1 );
 
