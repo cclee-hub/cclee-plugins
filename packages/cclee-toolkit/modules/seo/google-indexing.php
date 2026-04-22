@@ -42,7 +42,7 @@ function cclee_toolkit_google_get_credentials() {
  *
  * @return string|false Access Token 或 false
  */
-function cclee_toolkit_google_get_access_token() {
+function cclee_toolkit_google_get_access_token( string $source = 'google' ) {
 	$cached = get_transient( 'cclee_toolkit_google_access_token' );
 	if ( $cached ) {
 		return $cached;
@@ -54,7 +54,7 @@ function cclee_toolkit_google_get_access_token() {
 			home_url( '/' ),
 			'fail',
 			0,
-			'google',
+			$source,
 			'auth_error: invalid or missing Service Account JSON'
 		);
 		return false;
@@ -90,7 +90,7 @@ function cclee_toolkit_google_get_access_token() {
 			home_url( '/' ),
 			'fail',
 			0,
-			'google',
+			$source,
 			'auth_error: JWT signing failed'
 		);
 		return false;
@@ -114,7 +114,7 @@ function cclee_toolkit_google_get_access_token() {
 			home_url( '/' ),
 			'fail',
 			0,
-			'google',
+			$source,
 			'auth_error: token request failed'
 		);
 		return false;
@@ -129,7 +129,7 @@ function cclee_toolkit_google_get_access_token() {
 			home_url( '/' ),
 			'fail',
 			wp_remote_retrieve_response_code( $response ),
-			'google',
+			$source,
 			$error_msg
 		);
 		return false;
@@ -207,8 +207,8 @@ add_action( 'before_delete_post', function ( int $post_id ) {
  * @param string $url  页面完整 URL
  * @param string $type URL_UPDATED 或 URL_DELETED
  */
-function cclee_toolkit_google_submit_url( string $url, string $type = 'URL_UPDATED' ): void {
-	$token = cclee_toolkit_google_get_access_token();
+function cclee_toolkit_google_submit_url( string $url, string $type = 'URL_UPDATED', string $source = 'google' ): void {
+	$token = cclee_toolkit_google_get_access_token( $source );
 	if ( ! $token ) {
 		// 认证失败已在 get_access_token 中记录日志
 		return;
@@ -238,5 +238,5 @@ function cclee_toolkit_google_submit_url( string $url, string $type = 'URL_UPDAT
 		$error_detail = substr( $body, 0, 200 );
 	}
 
-	cclee_toolkit_indexing_log_entry( $url, $status, $response_code, 'google', $error_detail );
+	cclee_toolkit_indexing_log_entry( $url, $status, $response_code, $source, $error_detail );
 }

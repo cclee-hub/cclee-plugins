@@ -315,6 +315,27 @@ function cclee_toolkit_render_seo(): void {
 					<?php esc_html_e( 'Create a Service Account in Google Cloud Console, enable Indexing API, and grant it "Site owner" permission in Search Console. Then paste the JSON key file content above.', 'cclee-toolkit' ); ?>
 				</p>
 
+				<hr style="margin:1.5em 0;">
+				<h4 style="margin-bottom:0.5em;"><?php esc_html_e( 'Manual Submission', 'cclee-toolkit' ); ?></h4>
+				<p>
+					<input type="url" id="cclee-manual-url" class="regular-text"
+						placeholder="<?php esc_attr_e( 'https://yoursite.com/page/', 'cclee-toolkit' ); ?>">
+					<button type="button" class="button button-secondary" id="cclee-manual-submit">
+						<?php esc_html_e( 'Submit', 'cclee-toolkit' ); ?>
+					</button>
+				</p>
+				<fieldset style="margin-top:0.5em;">
+					<label style="margin-right:1em;">
+						<input type="checkbox" id="cclee-manual-indexnow" checked>
+						<?php esc_html_e( 'IndexNow', 'cclee-toolkit' ); ?>
+					</label>
+					<label>
+						<input type="checkbox" id="cclee-manual-google" checked>
+						<?php esc_html_e( 'Google', 'cclee-toolkit' ); ?>
+					</label>
+				</fieldset>
+				<p id="cclee-manual-result" style="display:none;"></p>
+
 				<?php cclee_toolkit_render_indexing_log(); ?>
 			</td>
 		</tr>
@@ -351,16 +372,55 @@ add_action( 'admin_footer', function() {
 	?>
 	<script>
 	(function() {
+		// IndexNow Generate Key
 		var btn = document.getElementById('cclee-indexnow-generate');
-		if (!btn) return;
-		btn.addEventListener('click', function() {
-			var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-			var key = '';
-			for (var i = 0; i < 32; i++) {
-				key += chars.charAt(Math.floor(Math.random() * chars.length));
-			}
-			document.getElementById('cclee_toolkit_seo_indexnow_key').value = key;
-		});
+		if (btn) {
+			btn.addEventListener('click', function() {
+				var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+				var key = '';
+				for (var i = 0; i < 32; i++) {
+					key += chars.charAt(Math.floor(Math.random() * chars.length));
+				}
+				document.getElementById('cclee_toolkit_seo_indexnow_key').value = key;
+			});
+		}
+
+		// Manual URL Submission
+		var submitBtn = document.getElementById('cclee-manual-submit');
+		if (submitBtn) {
+			submitBtn.addEventListener('click', function() {
+				var url = document.getElementById('cclee-manual-url').value.trim();
+				var channels = [];
+				if (document.getElementById('cclee-manual-indexnow').checked) channels.push('indexnow');
+				if (document.getElementById('cclee-manual-google').checked) channels.push('google');
+
+				var resultEl = document.getElementById('cclee-manual-result');
+				resultEl.style.display = 'block';
+				resultEl.style.color = '';
+				resultEl.textContent = '<?php esc_html_e( 'Submitting...', 'cclee-toolkit' ); ?>';
+				submitBtn.disabled = true;
+
+				jQuery.post(ajaxurl, {
+					action: 'cclee_manual_submit_url',
+					nonce: '<?php echo esc_js( wp_create_nonce( 'cclee_manual_submit_nonce' ) ); ?>',
+					url: url,
+					channels: channels
+				}, function(response) {
+					submitBtn.disabled = false;
+					if (response.success) {
+						resultEl.style.color = 'green';
+						resultEl.textContent = response.data.message;
+					} else {
+						resultEl.style.color = 'red';
+						resultEl.textContent = response.data.message;
+					}
+				}).fail(function() {
+					submitBtn.disabled = false;
+					resultEl.style.color = 'red';
+					resultEl.textContent = '<?php esc_html_e( 'Request failed.', 'cclee-toolkit' ); ?>';
+				});
+			});
+		}
 	})();
 	</script>
 	<?php

@@ -46,6 +46,9 @@ add_action( 'plugins_loaded', function() {
 		if ( get_option( 'cclee_toolkit_seo_google_indexing_enabled', false ) ) {
 			require_once CCLEE_TOOLKIT_PATH . 'modules/seo/google-indexing.php';
 		}
+
+		// Manual URL Submission (AJAX handler, always available when SEO is on)
+		require_once CCLEE_TOOLKIT_PATH . 'modules/seo/manual-submit.php';
 	}
 
 	// Case Study CPT

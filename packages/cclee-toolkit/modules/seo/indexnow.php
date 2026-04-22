@@ -94,7 +94,7 @@ add_action( 'transition_post_status', function ( string $new_status, string $old
  *
  * @param array $urls 要提交的 URL 列表
  */
-function cclee_toolkit_indexnow_submit( array $urls ): void {
+function cclee_toolkit_indexnow_submit( array $urls, string $source = 'indexnow' ): void {
 	$key    = cclee_toolkit_indexnow_get_key();
 	$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 
@@ -115,7 +115,7 @@ function cclee_toolkit_indexnow_submit( array $urls ): void {
 	$status        = in_array( $response_code, array( 200, 202 ), true ) ? 'success' : 'fail';
 
 	foreach ( $urls as $url ) {
-		cclee_toolkit_indexing_log_entry( $url, $status, $response_code, 'indexnow' );
+		cclee_toolkit_indexing_log_entry( $url, $status, $response_code, $source );
 	}
 }
 
