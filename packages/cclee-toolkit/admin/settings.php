@@ -221,7 +221,7 @@ function cclee_toolkit_render_seo(): void {
 	?>
 	<h2><?php esc_html_e( 'SEO Settings', 'cclee-toolkit' ); ?></h2>
 	<p class="description" style="margin-bottom:1em;">
-		<?php esc_html_e( 'Outputs Open Graph tags, Twitter Card meta, and JSON-LD Schema markup in frontend <code>&lt;head&gt;</code>.', 'cclee-toolkit' ); ?>
+		<?php esc_html_e( 'Outputs Open Graph tags, Twitter Card meta, and JSON-LD Schema markup in frontend <code>&lt;head&gt;</code>. Structured data output, compatible with AI crawler indexing.', 'cclee-toolkit' ); ?>
 	</p>
 
 	<table class="form-table" role="presentation">
