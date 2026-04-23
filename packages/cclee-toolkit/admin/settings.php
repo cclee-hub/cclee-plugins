@@ -318,11 +318,11 @@ function cclee_toolkit_render_alt(): void {
 				</fieldset>
 				<?php
 				$batch_enabled = (bool) get_option( 'cclee_toolkit_alt_batch_enabled', false );
-				if ( $batch_enabled && $ai_enabled ) :
-					$empty_count = function_exists( 'cclee_toolkit_count_empty_alt_images' )
-						? cclee_toolkit_count_empty_alt_images() : 0;
+				$empty_count = function_exists( 'cclee_toolkit_count_empty_alt_images' )
+					? cclee_toolkit_count_empty_alt_images() : 0;
+				$show_batch  = $batch_enabled && $ai_enabled;
 				?>
-				<div id="cclee-alt-batch-section" style="margin-top:1em; padding:1em; background:#f6f7f7; border:1px solid #dcdcde; border-radius:4px; <?php echo ( $batch_enabled && $ai_enabled ) ? '' : 'display:none;'; ?>">
+				<div id="cclee-alt-batch-section" style="margin-top:1em; padding:1em; background:#f6f7f7; border:1px solid #dcdcde; border-radius:4px; <?php echo $show_batch ? '' : 'display:none;'; ?>">
 					<p style="margin:0 0 0.5em;">
 						<strong><?php esc_html_e( 'Batch Processing', 'cclee-toolkit' ); ?></strong>
 						&mdash;
@@ -351,7 +351,6 @@ function cclee_toolkit_render_alt(): void {
 						</div>
 					</div>
 				</div>
-				<?php endif; ?>
 			</td>
 		</tr>
 	</table>
