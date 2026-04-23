@@ -17,8 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 function cclee_toolkit_get_tabs(): array {
 	return array(
 		'general' => __( 'General', 'cclee-toolkit' ),
-		'seo'    => __( 'SEO', 'cclee-toolkit' ),
-		'woo'    => __( 'WooCommerce', 'cclee-toolkit' ),
+		'seo'     => __( 'SEO', 'cclee-toolkit' ),
+		'alt'     => __( 'Image Alt', 'cclee-toolkit' ),
+		'woo'     => __( 'WooCommerce', 'cclee-toolkit' ),
 	);
 }
 
@@ -50,6 +51,7 @@ add_action( 'admin_init', function() {
 		'cclee_toolkit_woo_schema_enabled',
 		'cclee_toolkit_alt_auto_enabled',
 		'cclee_toolkit_alt_batch_enabled',
+		'cclee_toolkit_alt_force_overwrite',
 		'cclee_toolkit_llms_enabled',
 	];
 	foreach ( $checkboxes as $option ) {
@@ -71,6 +73,24 @@ add_action( 'admin_init', function() {
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_indexnow_key' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_google_service_account' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_llms_extra', [ 'default' => '' ] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_alt_max_tokens', [
+		'sanitize_callback' => function( $value ) {
+			$v = absint( $value );
+			if ( $v < 50 )  $v = 50;
+			if ( $v > 500 ) $v = 500;
+			return $v;
+		},
+		'default' => 100,
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_alt_temperature', [
+		'sanitize_callback' => function( $value ) {
+			$v = floatval( $value );
+			if ( $v < 0 ) $v = 0;
+			if ( $v > 1 ) $v = 1;
+			return $v;
+		},
+		'default' => 0.3,
+	] );
 } );
 
 /**
@@ -125,6 +145,8 @@ function cclee_toolkit_render_page(): void {
 				cclee_toolkit_render_general();
 			} elseif ( 'seo' === $tab ) {
 				cclee_toolkit_render_seo();
+			} elseif ( 'alt' === $tab ) {
+				cclee_toolkit_render_alt();
 			} elseif ( 'woo' === $tab ) {
 				cclee_toolkit_render_woo();
 			}
@@ -221,6 +243,36 @@ function cclee_toolkit_render_general(): void {
 		</tr>
 
 		<tr>
+			<th scope="row"><?php esc_html_e( 'Case Study CPT', 'cclee-toolkit' ); ?></th>
+			<td>
+				<fieldset>
+					<input type="hidden" name="cclee_toolkit_case_study_enabled" value="0">
+					<label>
+						<input type="checkbox" name="cclee_toolkit_case_study_enabled" value="1"
+							<?php checked( get_option( 'cclee_toolkit_case_study_enabled', true ), true ); ?>>
+						<?php esc_html_e( 'Enable Case Study custom post type and related blocks', 'cclee-toolkit' ); ?>
+					</label>
+				</fieldset>
+			</td>
+		</tr>
+	</table>
+	<?php
+}
+
+/**
+ * =====================
+ * Image Alt Tab
+ * =====================
+ */
+function cclee_toolkit_render_alt(): void {
+	?>
+	<h2><?php esc_html_e( 'Image Alt Settings', 'cclee-toolkit' ); ?></h2>
+	<p class="description" style="margin-bottom:1em;">
+		<?php esc_html_e( 'AI parameters (API Key / Provider / Model) are configured in the General Tab.', 'cclee-toolkit' ); ?>
+	</p>
+
+	<table class="form-table" role="presentation">
+		<tr>
 			<th scope="row"><h3 style="margin:0;"><?php esc_html_e( 'Image Alt', 'cclee-toolkit' ); ?></h3></th>
 			<td>
 				<fieldset>
@@ -232,7 +284,7 @@ function cclee_toolkit_render_general(): void {
 							<?php disabled( ! $ai_enabled ); ?>>
 						<?php esc_html_e( 'Auto-generate alt text on image upload using AI', 'cclee-toolkit' ); ?>
 					</label>
-					<p id="cclee-alt-auto-hint" class="description" style="color:#d63638; <?php echo $ai_enabled ? 'display:none;' : ''; ?>"><?php esc_html_e( 'Requires AI module enabled above.', 'cclee-toolkit' ); ?></p>
+					<p id="cclee-alt-auto-hint" class="description" style="color:#d63638; <?php echo $ai_enabled ? 'display:none;' : ''; ?>"><?php esc_html_e( 'Requires AI module enabled in General Tab.', 'cclee-toolkit' ); ?></p>
 					<br><br>
 					<input type="hidden" name="cclee_toolkit_alt_batch_enabled" value="0">
 					<label>
@@ -240,6 +292,29 @@ function cclee_toolkit_render_general(): void {
 							<?php checked( get_option( 'cclee_toolkit_alt_batch_enabled', false ), true ); ?>>
 						<?php esc_html_e( 'Enable batch alt text processing', 'cclee-toolkit' ); ?>
 					</label>
+					<br><br>
+					<input type="hidden" name="cclee_toolkit_alt_force_overwrite" value="0">
+					<label>
+						<input type="checkbox" name="cclee_toolkit_alt_force_overwrite" value="1"
+							<?php checked( get_option( 'cclee_toolkit_alt_force_overwrite', false ), true ); ?>>
+						<?php esc_html_e( 'Force overwrite existing alt text', 'cclee-toolkit' ); ?>
+					</label>
+					<br><br>
+					<label>
+						<?php esc_html_e( 'Max Tokens', 'cclee-toolkit' ); ?>&nbsp;
+						<input type="number" name="cclee_toolkit_alt_max_tokens"
+							value="<?php echo esc_attr( get_option( 'cclee_toolkit_alt_max_tokens', 100 ) ); ?>"
+							min="50" max="500" step="1" class="small-text">
+					</label>
+					<p class="description"><?php esc_html_e( 'Tokens limit for AI response (50–500)', 'cclee-toolkit' ); ?></p>
+					<br>
+					<label>
+						<?php esc_html_e( 'Temperature', 'cclee-toolkit' ); ?>&nbsp;
+						<input type="number" name="cclee_toolkit_alt_temperature"
+							value="<?php echo esc_attr( get_option( 'cclee_toolkit_alt_temperature', 0.3 ) ); ?>"
+							min="0" max="1" step="0.1" class="small-text">
+					</label>
+					<p class="description"><?php esc_html_e( 'AI creativity level (0 = precise, 1 = creative)', 'cclee-toolkit' ); ?></p>
 				</fieldset>
 				<?php
 				$batch_enabled = (bool) get_option( 'cclee_toolkit_alt_batch_enabled', false );
@@ -277,20 +352,6 @@ function cclee_toolkit_render_general(): void {
 					</div>
 				</div>
 				<?php endif; ?>
-			</td>
-		</tr>
-
-		<tr>
-			<th scope="row"><?php esc_html_e( 'Case Study CPT', 'cclee-toolkit' ); ?></th>
-			<td>
-				<fieldset>
-					<input type="hidden" name="cclee_toolkit_case_study_enabled" value="0">
-					<label>
-						<input type="checkbox" name="cclee_toolkit_case_study_enabled" value="1"
-							<?php checked( get_option( 'cclee_toolkit_case_study_enabled', true ), true ); ?>>
-						<?php esc_html_e( 'Enable Case Study custom post type and related blocks', 'cclee-toolkit' ); ?>
-					</label>
-				</fieldset>
 			</td>
 		</tr>
 	</table>
@@ -455,7 +516,6 @@ function cclee_toolkit_render_seo(): void {
 					<br>
 					<label>
 						<input type="checkbox" name="cclee_toolkit_seo_jsonld_enabled" value="1"
-							<?php checked( get_option( 'cclee_toolkit_seo_jsonld_enabled', true ), true ); ?>>
 							<?php checked( get_option( 'cclee_toolkit_seo_jsonld_enabled', true ), true ); ?>>
 						<?php esc_html_e( 'Output JSON-LD Schema (WebPage / Article structured data)', 'cclee-toolkit' ); ?>
 					</label>
