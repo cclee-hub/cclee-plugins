@@ -151,7 +151,7 @@ function cclee_toolkit_render_general(): void {
 				<fieldset>
 					<input type="hidden" name="cclee_toolkit_ai_enabled" value="0">
 					<label>
-						<input type="checkbox" name="cclee_toolkit_ai_enabled" value="1"
+						<input type="checkbox" id="cclee-ai-toggle" name="cclee_toolkit_ai_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_ai_enabled', false ), true ); ?>>
 						<?php esc_html_e( 'Enable AI content assistant in editor', 'cclee-toolkit' ); ?>
 					</label>
@@ -227,14 +227,12 @@ function cclee_toolkit_render_general(): void {
 					<?php $ai_enabled = (bool) get_option( 'cclee_toolkit_ai_enabled', false ); ?>
 					<input type="hidden" name="cclee_toolkit_alt_auto_enabled" value="0">
 					<label>
-						<input type="checkbox" name="cclee_toolkit_alt_auto_enabled" value="1"
+						<input type="checkbox" id="cclee-alt-auto-toggle" name="cclee_toolkit_alt_auto_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_alt_auto_enabled', false ), true ); ?>
 							<?php disabled( ! $ai_enabled ); ?>>
 						<?php esc_html_e( 'Auto-generate alt text on image upload using AI', 'cclee-toolkit' ); ?>
 					</label>
-					<?php if ( ! $ai_enabled ) : ?>
-						<p class="description" style="color:#d63638;"><?php esc_html_e( 'Requires AI module enabled above.', 'cclee-toolkit' ); ?></p>
-					<?php endif; ?>
+					<p id="cclee-alt-auto-hint" class="description" style="color:#d63638; <?php echo $ai_enabled ? 'display:none;' : ''; ?>"><?php esc_html_e( 'Requires AI module enabled above.', 'cclee-toolkit' ); ?></p>
 					<br><br>
 					<input type="hidden" name="cclee_toolkit_alt_batch_enabled" value="0">
 					<label>
@@ -249,7 +247,7 @@ function cclee_toolkit_render_general(): void {
 					$empty_count = function_exists( 'cclee_toolkit_count_empty_alt_images' )
 						? cclee_toolkit_count_empty_alt_images() : 0;
 				?>
-				<div style="margin-top:1em; padding:1em; background:#f6f7f7; border:1px solid #dcdcde; border-radius:4px;">
+				<div id="cclee-alt-batch-section" style="margin-top:1em; padding:1em; background:#f6f7f7; border:1px solid #dcdcde; border-radius:4px; <?php echo ( $batch_enabled && $ai_enabled ) ? '' : 'display:none;'; ?>">
 					<p style="margin:0 0 0.5em;">
 						<strong><?php esc_html_e( 'Batch Processing', 'cclee-toolkit' ); ?></strong>
 						&mdash;
@@ -496,6 +494,31 @@ add_action( 'admin_footer', function() {
 	?>
 	<script>
 	(function() {
+		// AI toggle -> ALT auto checkbox + batch section linkage
+		var aiToggle = document.getElementById('cclee-ai-toggle');
+		var altAutoToggle = document.getElementById('cclee-alt-auto-toggle');
+		var altAutoHint = document.getElementById('cclee-alt-auto-hint');
+		var altBatchSection = document.getElementById('cclee-alt-batch-section');
+		var altBatchToggle = document.querySelector('input[name="cclee_toolkit_alt_batch_enabled"]');
+		if (aiToggle) {
+			aiToggle.addEventListener('change', function() {
+				var on = aiToggle.checked;
+				altAutoToggle.disabled = !on;
+				altAutoHint.style.display = on ? 'none' : '';
+				if (on && altBatchToggle && altBatchToggle.checked) {
+					altBatchSection.style.display = '';
+				} else if (!on) {
+					altBatchSection.style.display = 'none';
+				}
+			});
+		}
+		if (altBatchToggle) {
+			altBatchToggle.addEventListener('change', function() {
+				var show = aiToggle.checked && altBatchToggle.checked;
+				altBatchSection.style.display = show ? '' : 'none';
+			});
+		}
+
 		// IndexNow Generate Key
 		var btn = document.getElementById('cclee-indexnow-generate');
 		if (btn) {
