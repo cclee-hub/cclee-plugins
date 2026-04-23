@@ -317,16 +317,22 @@ function cclee_toolkit_render_alt(): void {
 					<p class="description"><?php esc_html_e( 'AI creativity level (0 = precise, 1 = creative)', 'cclee-toolkit' ); ?></p>
 				</fieldset>
 				<?php
-				$batch_enabled = (bool) get_option( 'cclee_toolkit_alt_batch_enabled', false );
-				$empty_count = function_exists( 'cclee_toolkit_count_empty_alt_images' )
-					? cclee_toolkit_count_empty_alt_images() : 0;
+				$batch_enabled  = (bool) get_option( 'cclee_toolkit_alt_batch_enabled', false );
+				$force_overwrite = (bool) get_option( 'cclee_toolkit_alt_force_overwrite', false );
+				if ( $force_overwrite ) {
+					$img_count = function_exists( 'cclee_toolkit_count_images' )
+						? cclee_toolkit_count_images() : 0;
+				} else {
+					$img_count = function_exists( 'cclee_toolkit_count_empty_alt_images' )
+						? cclee_toolkit_count_empty_alt_images() : 0;
+				}
 				$show_batch  = $batch_enabled;
 				?>
 				<div id="cclee-alt-batch-section" style="margin-top:1em; padding:1em; background:#f6f7f7; border:1px solid #dcdcde; border-radius:4px; <?php echo $show_batch ? '' : 'display:none;'; ?>">
 					<p style="margin:0 0 0.5em;">
 						<strong><?php esc_html_e( 'Batch Processing', 'cclee-toolkit' ); ?></strong>
 						&mdash;
-						<?php printf( esc_html__( 'Images without alt: %d', 'cclee-toolkit' ), $empty_count ); ?>
+						<?php printf( esc_html__( 'Images to process: %d', 'cclee-toolkit' ), $img_count ); ?>
 					</p>
 					<p style="margin:0 0 0.5em;">
 						<label><?php esc_html_e( 'Batch size', 'cclee-toolkit' ); ?>

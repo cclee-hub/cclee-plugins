@@ -333,9 +333,6 @@ function cclee_toolkit_alt_save_single( WP_REST_Request $request ) {
  * @return array|WP_Error
  */
 function cclee_toolkit_alt_batch_process( WP_REST_Request $request ) {
-	if ( ! get_option( 'cclee_toolkit_ai_enabled', false ) ) {
-		return new WP_Error( 'ai_disabled', __( 'AI module is not enabled.', 'cclee-toolkit' ), [ 'status' => 400 ] );
-	}
 	if ( ! get_option( 'cclee_toolkit_alt_batch_enabled', false ) ) {
 		return new WP_Error( 'batch_disabled', __( 'Batch processing is not enabled.', 'cclee-toolkit' ), [ 'status' => 400 ] );
 	}
@@ -478,6 +475,23 @@ function cclee_toolkit_count_empty_alt_images(): int {
 				'compare' => '=',
 			],
 		],
+	] );
+	return $query->found_posts;
+}
+
+/**
+ * 查询所有图片总数
+ *
+ * @return int
+ */
+function cclee_toolkit_count_images(): int {
+	$query = new WP_Query( [
+		'post_type'      => 'attachment',
+		'post_status'    => 'inherit',
+		'post_mime_type' => 'image',
+		'posts_per_page' => 1,
+		'fields'         => 'ids',
+		'no_found_rows'  => false,
 	] );
 	return $query->found_posts;
 }
