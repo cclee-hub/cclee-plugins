@@ -111,6 +111,48 @@ function cclee_toolkit_alt_call_ai( string $prompt ) {
 }
 
 /**
+ * 查找图片关联的 WooCommerce 商品
+ *
+ * @param int $attachment_id 附件 ID
+ * @return \WC_Product|null
+ */
+function cclee_toolkit_alt_find_product( int $attachment_id ) {
+	if ( ! function_exists( 'wc_get_product' ) ) {
+		return null;
+	}
+
+	// 1. 直接父级
+	$parent_id = wp_get_post_parent_id( $attachment_id );
+	if ( $parent_id && 'product' === get_post_type( $parent_id ) ) {
+		return wc_get_product( $parent_id );
+	}
+
+	global $wpdb;
+	$id_str = (string) $attachment_id;
+
+	// 2. 作为商品主图
+	$parent = $wpdb->get_var( $wpdb->prepare(
+		"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_thumbnail_id' AND meta_value = %s LIMIT 1",
+		$id_str
+	) );
+	if ( $parent && 'product' === get_post_type( $parent ) ) {
+		return wc_get_product( $parent );
+	}
+
+	// 3. 在商品图片画廊中
+	$like   = '%' . $wpdb->esc_like( $id_str ) . '%';
+	$parent = $wpdb->get_var( $wpdb->prepare(
+		"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_product_image_gallery' AND meta_value LIKE %s LIMIT 1",
+		$like
+	) );
+	if ( $parent && 'product' === get_post_type( $parent ) ) {
+		return wc_get_product( $parent );
+	}
+
+	return null;
+}
+
+/**
  * 构造图片 alt 生成 prompt
  *
  * @param int $attachment_id 附件 ID
@@ -123,15 +165,76 @@ function cclee_toolkit_alt_build_prompt( int $attachment_id ): string {
 
 	$parts = array();
 
-	if ( $filename ) {
-		$parts[] = sprintf( 'Image file name: "%s"', $filename );
-	}
+	$product = cclee_toolkit_alt_find_product( $attachment_id );
 
-	$parent_id = wp_get_post_parent_id( $attachment_id );
-	if ( $parent_id ) {
-		$parent_title = get_the_title( $parent_id );
-		if ( $parent_title ) {
-			$parts[] = sprintf( 'Used in post: "%s"', $parent_title );
+	if ( $product ) {
+		// 商品名
+		$name = $product->get_name();
+		if ( $name ) {
+			$parts[] = sprintf( 'Product: "%s"', $name );
+		}
+
+		// 简短描述 (前200字符)
+		$short_desc = strip_tags( $product->get_short_description() );
+		$short_desc = trim( mb_substr( $short_desc, 0, 200 ) );
+		if ( $short_desc ) {
+			$parts[] = sprintf( 'Short description: %s', $short_desc );
+		}
+
+		// 完整描述 (前300字符)
+		$desc = strip_tags( $product->get_description() );
+		$desc = trim( mb_substr( $desc, 0, 300 ) );
+		if ( $desc ) {
+			$parts[] = sprintf( 'Description: %s', $desc );
+		}
+
+		// 分类 (前5个)
+		$cat_ids = $product->get_category_ids();
+		if ( ! empty( $cat_ids ) ) {
+			$cat_ids  = array_slice( $cat_ids, 0, 5 );
+			$cat_names = array_filter( array_map( function( $id ) {
+				$term = get_term( $id );
+				return $term && ! is_wp_error( $term ) ? $term->name : '';
+			}, $cat_ids ) );
+			if ( ! empty( $cat_names ) ) {
+				$parts[] = sprintf( 'Categories: %s', implode( ', ', $cat_names ) );
+			}
+		}
+
+		// 标签 (前5个)
+		$tag_ids = $product->get_tag_ids();
+		if ( ! empty( $tag_ids ) ) {
+			$tag_ids  = array_slice( $tag_ids, 0, 5 );
+			$tag_names = array_filter( array_map( function( $id ) {
+				$term = get_term( $id );
+				return $term && ! is_wp_error( $term ) ? $term->name : '';
+			}, $tag_ids ) );
+			if ( ! empty( $tag_names ) ) {
+				$parts[] = sprintf( 'Tags: %s', implode( ', ', $tag_names ) );
+			}
+		}
+
+		// 文件名
+		if ( $filename ) {
+			$parts[] = sprintf( 'Image file name: "%s"', $filename );
+		}
+	} else {
+		// 回退：WP 原有逻辑
+		if ( $filename ) {
+			$parts[] = sprintf( 'Image file name: "%s"', $filename );
+		}
+
+		$parent_id = wp_get_post_parent_id( $attachment_id );
+		if ( $parent_id ) {
+			$parent_title = get_the_title( $parent_id );
+			if ( $parent_title ) {
+				$parts[] = sprintf( 'Used in post: "%s"', $parent_title );
+			}
+			$parent_content = strip_tags( get_post_field( 'post_content', $parent_id ) );
+			$parent_content = trim( mb_substr( $parent_content, 0, 300 ) );
+			if ( $parent_content ) {
+				$parts[] = sprintf( 'Post content: %s', $parent_content );
+			}
 		}
 	}
 
@@ -139,7 +242,7 @@ function cclee_toolkit_alt_build_prompt( int $attachment_id ): string {
 		return '';
 	}
 
-	return implode( '. ', $parts ) . '. Generate a short, descriptive alt text for this image.';
+	return implode( '. ', $parts ) . '. Generate a concise alt text under 50 characters for this image.';
 }
 
 /**
