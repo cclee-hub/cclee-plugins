@@ -33,8 +33,12 @@ add_action( 'plugins_loaded', function() {
 		require_once CCLEE_TOOLKIT_PATH . 'modules/ai/ai.php';
 	}
 
-	// SEO Enhancer
-	if ( get_option( 'cclee_toolkit_seo_enabled', true ) ) {
+	// SEO Enhancer (default on; treat empty/missing as true)
+	$seo_enabled = get_option( 'cclee_toolkit_seo_enabled', true );
+	if ( '' === $seo_enabled ) {
+		$seo_enabled = true;
+	}
+	if ( $seo_enabled ) {
 		require_once CCLEE_TOOLKIT_PATH . 'modules/seo/seo.php';
 		require_once CCLEE_TOOLKIT_PATH . 'modules/seo/meta-fields.php';
 		require_once CCLEE_TOOLKIT_PATH . 'modules/seo/alt-auto.php';
