@@ -98,6 +98,7 @@ function cclee_toolkit_alt_call_ai( string $prompt ) {
 	}
 
 	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
 	$text = ( 'anthropic' === $provider )
 		? ( $body['content'][0]['text'] ?? '' )
 		: ( $body['choices'][0]['message']['content'] ?? '' );
@@ -333,7 +334,7 @@ function cclee_toolkit_alt_save_single( WP_REST_Request $request ) {
  * @return array|WP_Error
  */
 function cclee_toolkit_alt_batch_process( WP_REST_Request $request ) {
-	if ( ! get_option( 'cclee_toolkit_alt_batch_enabled', false ) ) {
+	if ( ! get_option( 'cclee_toolkit_alt_batch_enabled', true ) ) {
 		return new WP_Error( 'batch_disabled', __( 'Batch processing is not enabled.', 'cclee-toolkit' ), [ 'status' => 400 ] );
 	}
 
@@ -341,7 +342,8 @@ function cclee_toolkit_alt_batch_process( WP_REST_Request $request ) {
 	if ( $batch_size < 1 )  $batch_size = 10;
 	if ( $batch_size > 50 ) $batch_size = 50;
 
-	$force = (bool) get_option( 'cclee_toolkit_alt_force_overwrite', false );
+	$offset = absint( $request->get_param( 'offset' ) );
+	$force  = (bool) get_option( 'cclee_toolkit_alt_force_overwrite', false );
 
 	$query_args = [
 		'post_type'      => 'attachment',
@@ -350,6 +352,7 @@ function cclee_toolkit_alt_batch_process( WP_REST_Request $request ) {
 		'posts_per_page' => $batch_size,
 		'fields'         => 'ids',
 		'no_found_rows'  => false,
+		'offset'         => $offset,
 	];
 
 	if ( ! $force ) {
@@ -414,9 +417,11 @@ function cclee_toolkit_alt_batch_process( WP_REST_Request $request ) {
 		}
 	}
 
-	// 剩余数量（强制覆盖模式下无意义，返回0）
-	$remaining = 0;
-	if ( ! $force ) {
+	// 剩余数量
+	if ( $force ) {
+		// 强制覆盖模式：基于 offset 分页
+		$remaining = max( 0, $query->found_posts - $offset - $processed );
+	} else {
 		$remaining_query = new WP_Query( [
 			'post_type'      => 'attachment',
 			'post_status'    => 'inherit',

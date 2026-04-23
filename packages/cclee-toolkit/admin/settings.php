@@ -130,10 +130,37 @@ function cclee_toolkit_render_nav( string $current ): void {
 }
 
 /**
+ * Tab 与注册 option 的映射，用于跨 tab 保存时保留其他 tab 的值
+ *
+ * @return array<string, array{checkboxes: string[], fields: string[]}>
+ */
+function cclee_toolkit_get_tab_options(): array {
+	return [
+		'general' => [
+			'checkboxes' => [ 'cclee_toolkit_ai_enabled', 'cclee_toolkit_case_study_enabled' ],
+			'fields'     => [ 'cclee_toolkit_ai_api_key', 'cclee_toolkit_ai_provider', 'cclee_toolkit_ai_base_url', 'cclee_toolkit_ai_model' ],
+		],
+		'seo' => [
+			'checkboxes' => [ 'cclee_toolkit_seo_enabled', 'cclee_toolkit_seo_og_enabled', 'cclee_toolkit_seo_jsonld_enabled', 'cclee_toolkit_seo_indexnow_enabled', 'cclee_toolkit_seo_google_indexing_enabled', 'cclee_toolkit_llms_enabled' ],
+			'fields'     => [ 'cclee_toolkit_seo_verify_google', 'cclee_toolkit_seo_verify_bing', 'cclee_toolkit_seo_verify_yandex', 'cclee_toolkit_seo_indexnow_key', 'cclee_toolkit_seo_google_service_account', 'cclee_toolkit_llms_extra' ],
+		],
+		'alt' => [
+			'checkboxes' => [ 'cclee_toolkit_alt_auto_enabled', 'cclee_toolkit_alt_batch_enabled', 'cclee_toolkit_alt_force_overwrite' ],
+			'fields'     => [ 'cclee_toolkit_alt_max_tokens', 'cclee_toolkit_alt_temperature' ],
+		],
+		'woo' => [
+			'checkboxes' => [ 'cclee_toolkit_woo_schema_enabled' ],
+			'fields'     => [],
+		],
+	];
+}
+
+/**
  * 渲染设置页
  */
 function cclee_toolkit_render_page(): void {
-	$tab = cclee_toolkit_get_current_tab();
+	$tab       = cclee_toolkit_get_current_tab();
+	$all_tabs  = cclee_toolkit_get_tab_options();
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'CCLEE Toolkit', 'cclee-toolkit' ); ?></h1>
@@ -141,6 +168,28 @@ function cclee_toolkit_render_page(): void {
 		<form method="post" action="options.php">
 			<?php
 			settings_fields( 'cclee_toolkit' );
+
+			// 为非当前 tab 的选项输出 hidden input，防止保存时被清空
+			foreach ( $all_tabs as $t => $opts ) {
+				if ( $t === $tab ) {
+					continue;
+				}
+				foreach ( $opts['checkboxes'] as $opt ) {
+					printf(
+						'<input type="hidden" name="%s" value="%s">',
+						esc_attr( $opt ),
+						get_option( $opt, false ) ? '1' : '0'
+					);
+				}
+				foreach ( $opts['fields'] as $opt ) {
+					printf(
+						'<input type="hidden" name="%s" value="%s">',
+						esc_attr( $opt ),
+						esc_attr( get_option( $opt, '' ) )
+					);
+				}
+			}
+
 			if ( 'general' === $tab ) {
 				cclee_toolkit_render_general();
 			} elseif ( 'seo' === $tab ) {
@@ -289,7 +338,7 @@ function cclee_toolkit_render_alt(): void {
 					<input type="hidden" name="cclee_toolkit_alt_batch_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_alt_batch_enabled" value="1"
-							<?php checked( get_option( 'cclee_toolkit_alt_batch_enabled', false ), true ); ?>>
+							<?php checked( get_option( 'cclee_toolkit_alt_batch_enabled', true ), true ); ?>>
 						<?php esc_html_e( 'Enable batch alt text processing', 'cclee-toolkit' ); ?>
 					</label>
 					<br><br>
@@ -657,6 +706,7 @@ add_action( 'admin_footer', function() {
 				var sizeInput = document.getElementById('cclee-alt-batch-size');
 				var totalSuccess = 0;
 				var totalFailed = 0;
+				var totalProcessed = 0;
 				var isRunning = false;
 
 				resultEl.style.display = 'block';
@@ -674,11 +724,12 @@ add_action( 'admin_footer', function() {
 						url: altBatchUrl,
 						method: 'POST',
 						beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', altNonce); },
-						data: JSON.stringify({ batch_size: parseInt(batchSize) }),
+						data: JSON.stringify({ batch_size: parseInt(batchSize), offset: totalProcessed }),
 						contentType: 'application/json',
 						success: function(data) {
 							totalSuccess += data.success;
 							totalFailed += data.failed;
+							totalProcessed += data.processed;
 							if (data.items) allItems = allItems.concat(data.items);
 							if (data.failed_items) allFailedItems = allFailedItems.concat(data.failed_items);
 							resultEl.textContent =
