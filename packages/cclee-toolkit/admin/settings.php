@@ -320,7 +320,7 @@ function cclee_toolkit_render_alt(): void {
 				$batch_enabled = (bool) get_option( 'cclee_toolkit_alt_batch_enabled', false );
 				$empty_count = function_exists( 'cclee_toolkit_count_empty_alt_images' )
 					? cclee_toolkit_count_empty_alt_images() : 0;
-				$show_batch  = $batch_enabled && $ai_enabled;
+				$show_batch  = $batch_enabled;
 				?>
 				<div id="cclee-alt-batch-section" style="margin-top:1em; padding:1em; background:#f6f7f7; border:1px solid #dcdcde; border-radius:4px; <?php echo $show_batch ? '' : 'display:none;'; ?>">
 					<p style="margin:0 0 0.5em;">
@@ -566,7 +566,7 @@ add_action( 'admin_footer', function() {
 	?>
 	<script>
 	(function() {
-		// AI toggle -> ALT auto checkbox + batch section linkage
+		// AI toggle -> ALT auto checkbox linkage (batch section is independent)
 		var aiToggle = document.getElementById('cclee-ai-toggle');
 		var altAutoToggle = document.getElementById('cclee-alt-auto-toggle');
 		var altAutoHint = document.getElementById('cclee-alt-auto-hint');
@@ -577,17 +577,11 @@ add_action( 'admin_footer', function() {
 				var on = aiToggle.checked;
 				altAutoToggle.disabled = !on;
 				altAutoHint.style.display = on ? 'none' : '';
-				if (on && altBatchToggle && altBatchToggle.checked) {
-					altBatchSection.style.display = '';
-				} else if (!on) {
-					altBatchSection.style.display = 'none';
-				}
 			});
 		}
 		if (altBatchToggle) {
 			altBatchToggle.addEventListener('change', function() {
-				var show = aiToggle.checked && altBatchToggle.checked;
-				altBatchSection.style.display = show ? '' : 'none';
+				altBatchSection.style.display = altBatchToggle.checked ? '' : 'none';
 			});
 		}
 
