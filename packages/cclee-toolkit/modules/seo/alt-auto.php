@@ -278,7 +278,7 @@ add_action( 'add_attachment', function( $post_id ) {
 } );
 
 /**
- * 注册批量处理 REST 端点
+ * 注册 REST 端点
  */
 add_action( 'rest_api_init', function() {
 	register_rest_route( 'cclee-toolkit/v1', '/seo/alt-batch', [
@@ -288,7 +288,38 @@ add_action( 'rest_api_init', function() {
 			return current_user_can( 'manage_options' );
 		},
 	] );
+
+	register_rest_route( 'cclee-toolkit/v1', '/seo/alt-save', [
+		'methods'             => 'POST',
+		'callback'            => 'cclee_toolkit_alt_save_single',
+		'permission_callback' => function() {
+			return current_user_can( 'manage_options' );
+		},
+	] );
 } );
+
+/**
+ * 单条 ALT 保存回调
+ *
+ * @param WP_REST_Request $request
+ * @return array|WP_Error
+ */
+function cclee_toolkit_alt_save_single( WP_REST_Request $request ) {
+	$attachment_id = absint( $request->get_param( 'attachment_id' ) );
+	$alt          = sanitize_text_field( $request->get_param( 'alt' ) );
+	$alt          = mb_substr( $alt, 0, 50 );
+
+	if ( ! $attachment_id || ! get_post( $attachment_id ) ) {
+		return new WP_Error( 'invalid_id', __( 'Invalid attachment ID.', 'cclee-toolkit' ), [ 'status' => 400 ] );
+	}
+
+	update_post_meta( $attachment_id, '_wp_attachment_image_alt', $alt );
+
+	return [
+		'success' => true,
+		'alt'     => $alt,
+	];
+}
 
 /**
  * 批量处理回调
@@ -339,13 +370,22 @@ function cclee_toolkit_alt_batch_process( WP_REST_Request $request ) {
 	$processed = 0;
 	$success   = 0;
 	$failed    = 0;
+	$items     = array();
+	$failed_items = array();
 
 	foreach ( $ids as $attachment_id ) {
 		$processed++;
+		$post = get_post( $attachment_id );
+		$filename = $post ? $post->post_title : '';
 
 		$prompt = cclee_toolkit_alt_build_prompt( $attachment_id );
 		if ( empty( $prompt ) ) {
 			$failed++;
+			$failed_items[] = array(
+				'attachment_id' => $attachment_id,
+				'filename'      => $filename,
+				'reason'        => __( 'Cannot build prompt (no filename, no context).', 'cclee-toolkit' ),
+			);
 			continue;
 		}
 
@@ -354,8 +394,20 @@ function cclee_toolkit_alt_batch_process( WP_REST_Request $request ) {
 		if ( ! is_wp_error( $result ) && ! empty( $result ) ) {
 			update_post_meta( $attachment_id, '_wp_attachment_image_alt', $result );
 			$success++;
+			$items[] = array(
+				'attachment_id' => $attachment_id,
+				'filename'      => $filename,
+				'alt'           => $result,
+				'thumbnail'     => wp_get_attachment_image_url( $attachment_id, 'thumbnail' ),
+			);
 		} else {
 			$failed++;
+			$reason = is_wp_error( $result ) ? $result->get_error_message() : __( 'AI returned empty response.', 'cclee-toolkit' );
+			$failed_items[] = array(
+				'attachment_id' => $attachment_id,
+				'filename'      => $filename,
+				'reason'        => $reason,
+			);
 		}
 	}
 
@@ -371,10 +423,12 @@ function cclee_toolkit_alt_batch_process( WP_REST_Request $request ) {
 	] );
 
 	return [
-		'processed' => $processed,
-		'success'   => $success,
-		'failed'    => $failed,
-		'remaining' => $remaining_query->found_posts,
+		'processed'    => $processed,
+		'success'      => $success,
+		'failed'       => $failed,
+		'remaining'    => $remaining_query->found_posts,
+		'items'        => $items,
+		'failed_items' => $failed_items,
 	];
 }
 

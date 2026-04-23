@@ -263,6 +263,19 @@ function cclee_toolkit_render_general(): void {
 					</p>
 					<p id="cclee-alt-batch-result" style="display:none; margin:0;"></p>
 				</div>
+				<!-- Modal overlay (hidden by default) -->
+				<div id="cclee-alt-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:160000;align-items:flex-start;justify-content:center;padding-top:60px;">
+					<div id="cclee-alt-modal" style="background:#fff;border:1px solid #c3c4c7;border-radius:4px;width:90%;max-width:700px;max-height:75vh;display:flex;flex-direction:column;box-shadow:0 5px 15px rgba(0,0,0,0.2);">
+						<div style="padding:16px 20px;border-bottom:1px solid #dcdcde;display:flex;justify-content:space-between;align-items:center;">
+							<h3 id="cclee-alt-modal-title" style="margin:0;font-size:14px;"></h3>
+							<button type="button" id="cclee-alt-modal-close" class="button button-link" style="font-size:18px;line-height:1;padding:0 4px;">&times;</button>
+						</div>
+						<div id="cclee-alt-modal-body" style="overflow-y:auto;flex:1;padding:12px 20px;"></div>
+						<div style="padding:12px 20px;border-top:1px solid #dcdcde;text-align:right;">
+							<button type="button" id="cclee-alt-modal-done" class="button button-primary"><?php esc_html_e( 'Close', 'cclee-toolkit' ); ?></button>
+						</div>
+					</div>
+				</div>
 				<?php endif; ?>
 			</td>
 		</tr>
@@ -569,9 +582,16 @@ add_action( 'admin_footer', function() {
 			});
 		}
 
-		// Alt Batch Processing (auto-continue until all done)
+		// Alt Batch Processing (auto-continue + result modal)
 		var batchBtn = document.getElementById('cclee-alt-batch-btn');
+		var altSaveUrl = '<?php echo esc_url( rest_url( 'cclee-toolkit/v1/seo/alt-save' ) ); ?>';
+		var altBatchUrl = '<?php echo esc_url( rest_url( 'cclee-toolkit/v1/seo/alt-batch' ) ); ?>';
+		var altNonce = '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>';
+
 		if (batchBtn) {
+			var allItems = [];
+			var allFailedItems = [];
+
 			batchBtn.addEventListener('click', function() {
 				var batchSize = document.getElementById('cclee-alt-batch-size').value || 10;
 				var resultEl = document.getElementById('cclee-alt-batch-result');
@@ -586,34 +606,34 @@ add_action( 'admin_footer', function() {
 				batchBtn.textContent = '<?php esc_html_e( 'Processing...', 'cclee-toolkit' ); ?>';
 				sizeInput.disabled = true;
 				isRunning = true;
+				allItems = [];
+				allFailedItems = [];
 
 				function runBatch() {
 					if (!isRunning) return;
-
 					jQuery.ajax({
-						url: '<?php echo esc_url( rest_url( 'cclee-toolkit/v1/seo/alt-batch' ) ); ?>',
+						url: altBatchUrl,
 						method: 'POST',
-						beforeSend: function(xhr) {
-							xhr.setRequestHeader('X-WP-Nonce', '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>');
-						},
+						beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', altNonce); },
 						data: JSON.stringify({ batch_size: parseInt(batchSize) }),
 						contentType: 'application/json',
 						success: function(data) {
 							totalSuccess += data.success;
 							totalFailed += data.failed;
-
+							if (data.items) allItems = allItems.concat(data.items);
+							if (data.failed_items) allFailedItems = allFailedItems.concat(data.failed_items);
 							resultEl.textContent =
 								'<?php esc_html_e( 'Done', 'cclee-toolkit' ); ?>: ' + (totalSuccess + totalFailed) +
 								' | <?php esc_html_e( 'Success', 'cclee-toolkit' ); ?>: ' + totalSuccess +
 								' | <?php esc_html_e( 'Failed', 'cclee-toolkit' ); ?>: ' + totalFailed +
 								' | <?php esc_html_e( 'Remaining', 'cclee-toolkit' ); ?>: ' + data.remaining;
-
 							if (data.remaining > 0) {
 								setTimeout(runBatch, 300);
 							} else {
 								isRunning = false;
 								batchBtn.textContent = '<?php esc_html_e( 'All Done', 'cclee-toolkit' ); ?>';
 								sizeInput.disabled = false;
+								if (allItems.length > 0) showAltModal(allItems, allFailedItems);
 							}
 						},
 						error: function() {
@@ -629,9 +649,104 @@ add_action( 'admin_footer', function() {
 						}
 					});
 				}
-
 				runBatch();
 			});
+
+			function showAltModal(items, failedItems) {
+				var overlay = document.getElementById('cclee-alt-modal-overlay');
+				var body = document.getElementById('cclee-alt-modal-body');
+				var title = document.getElementById('cclee-alt-modal-title');
+				if (!overlay || !body) return;
+				body.textContent = '';
+				title.textContent = '<?php esc_html_e( 'Batch ALT Results', 'cclee-toolkit' ); ?>' + ' (' + items.length + ')';
+				for (var i = 0; i < items.length; i++) {
+					var item = items[i];
+					var row = document.createElement('div');
+					row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:8px;';
+					if (item.thumbnail) {
+						var thumb = document.createElement('div');
+						thumb.style.cssText = 'background:url(' + item.thumbnail + ') center/cover;width:40px;height:40px;border:1px solid #dcdcde;border-radius:2px;flex-shrink:0;';
+						row.appendChild(thumb);
+					}
+					var info = document.createElement('div');
+					info.style.cssText = 'flex:1;min-width:0;';
+					var fname = document.createElement('div');
+					fname.style.cssText = 'font-size:12px;color:#50575e;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+					fname.title = item.filename;
+					fname.textContent = item.filename;
+					info.appendChild(fname);
+					var input = document.createElement('input');
+					input.type = 'text';
+					input.className = 'cclee-alt-edit-input';
+					input.dataset.id = item.attachment_id;
+					input.value = item.alt;
+					input.style.cssText = 'width:100%;padding:4px 8px;font-size:13px;box-sizing:border-box;';
+					info.appendChild(input);
+					row.appendChild(info);
+					var saveBtn = document.createElement('button');
+					saveBtn.type = 'button';
+					saveBtn.className = 'button button-small cclee-alt-save-btn';
+					saveBtn.dataset.id = item.attachment_id;
+					saveBtn.style.flexShrink = '0';
+					saveBtn.textContent = '<?php esc_html_e( 'Save', 'cclee-toolkit' ); ?>';
+					(function(btn, inp) {
+						btn.addEventListener('click', function() {
+							var id = btn.dataset.id;
+							var altVal = inp.value;
+							btn.disabled = true;
+							btn.textContent = '<?php esc_html_e( 'Saving...', 'cclee-toolkit' ); ?>';
+							jQuery.ajax({
+								url: altSaveUrl,
+								method: 'POST',
+								beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', altNonce); },
+								data: JSON.stringify({ attachment_id: parseInt(id), alt: altVal }),
+								contentType: 'application/json',
+								success: function(res) {
+									if (res.success) {
+										btn.textContent = '<?php esc_html_e( 'Saved', 'cclee-toolkit' ); ?>';
+										btn.classList.add('button-primary');
+									} else {
+										btn.disabled = false;
+										btn.textContent = '<?php esc_html_e( 'Save', 'cclee-toolkit' ); ?>';
+									}
+								},
+								error: function() {
+									btn.disabled = false;
+									btn.textContent = '<?php esc_html_e( 'Save', 'cclee-toolkit' ); ?>';
+								}
+							});
+						});
+					})(saveBtn, input);
+					row.appendChild(saveBtn);
+					body.appendChild(row);
+				}
+				if (failedItems.length > 0) {
+					var failSection = document.createElement('div');
+					failSection.style.cssText = 'margin-top:12px;padding-top:12px;border-top:1px solid #dcdcde;';
+					var failTitle = document.createElement('p');
+					failTitle.style.cssText = 'margin:0 0 8px;font-size:13px;color:#d63638;font-weight:600;';
+					failTitle.textContent = '<?php esc_html_e( 'Failed items', 'cclee-toolkit' ); ?>:';
+					failSection.appendChild(failTitle);
+					for (var j = 0; j < failedItems.length; j++) {
+						var failLine = document.createElement('div');
+						failLine.style.cssText = 'font-size:12px;color:#d63638;margin-bottom:4px;';
+						var strong = document.createElement('strong');
+						strong.textContent = failedItems[j].filename;
+						failLine.appendChild(strong);
+						failLine.appendChild(document.createTextNode(': ' + failedItems[j].reason));
+						failSection.appendChild(failLine);
+					}
+					body.appendChild(failSection);
+				}
+				overlay.style.display = 'flex';
+			}
+
+			var modalOverlay = document.getElementById('cclee-alt-modal-overlay');
+			if (modalOverlay) {
+				document.getElementById('cclee-alt-modal-close').addEventListener('click', function() { modalOverlay.style.display = 'none'; });
+				document.getElementById('cclee-alt-modal-done').addEventListener('click', function() { modalOverlay.style.display = 'none'; });
+				modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) modalOverlay.style.display = 'none'; });
+			}
 		}
 	})();
 	</script>
