@@ -3,7 +3,7 @@
  * Plugin Name: CCLEE Toolkit
  * Plugin URI: https://github.com/cclee-hub/cclee-toolkit
  * Description: B端企业官网增强工具包：AI内容辅助、SEO优化、案例展示CPT。
- * Version: 1.1.2
+ * Version: 1.1.3
  * Requires at least: 6.4
  * Requires PHP: 8.0
  * Author: CCLEE
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CCLEE_TOOLKIT_VERSION', '1.1.2' );
+define( 'CCLEE_TOOLKIT_VERSION', '1.1.3' );
 define( 'CCLEE_TOOLKIT_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CCLEE_TOOLKIT_URL', plugin_dir_url( __FILE__ ) );
 
