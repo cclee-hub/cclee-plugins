@@ -38,27 +38,39 @@ function cclee_toolkit_get_current_tab(): string {
  * 注册设置（所有 tab 共用同一 option group）
  */
 add_action( 'admin_init', function() {
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_enabled' );
+	// Checkbox options — sanitize callback ensures unchecked = false in DB
+	$checkboxes = [
+		'cclee_toolkit_ai_enabled',
+		'cclee_toolkit_seo_enabled',
+		'cclee_toolkit_seo_og_enabled',
+		'cclee_toolkit_seo_jsonld_enabled',
+		'cclee_toolkit_seo_indexnow_enabled',
+		'cclee_toolkit_seo_google_indexing_enabled',
+		'cclee_toolkit_case_study_enabled',
+		'cclee_toolkit_woo_schema_enabled',
+		'cclee_toolkit_alt_auto_enabled',
+		'cclee_toolkit_alt_batch_enabled',
+		'cclee_toolkit_llms_enabled',
+	];
+	foreach ( $checkboxes as $option ) {
+		register_setting( 'cclee_toolkit', $option, [
+			'sanitize_callback' => function( $value ) {
+				return $value ? true : false;
+			},
+		] );
+	}
+
+	// Text / select / textarea options — default sanitize is fine
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_api_key' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_provider' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_base_url' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_model' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_enabled' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_og_enabled' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_jsonld_enabled' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_google' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_bing' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_yandex' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_indexnow_enabled' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_indexnow_key' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_google_indexing_enabled' );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_google_service_account' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_case_study_enabled' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_woo_schema_enabled' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_alt_auto_enabled' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_alt_batch_enabled' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_llms_enabled', array( 'default' => false ) );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_llms_extra', array( 'default' => '' ) );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_llms_extra', [ 'default' => '' ] );
 } );
 
 /**
@@ -137,6 +149,7 @@ function cclee_toolkit_render_general(): void {
 			<th scope="row"><?php esc_html_e( 'AI Assistant', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
+					<input type="hidden" name="cclee_toolkit_ai_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_ai_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_ai_enabled', false ), true ); ?>>
@@ -200,9 +213,9 @@ function cclee_toolkit_render_general(): void {
 			<td>
 				<input type="text" name="cclee_toolkit_ai_model"
 					value="<?php echo esc_attr( get_option( 'cclee_toolkit_ai_model', '' ) ); ?>"
-					class="regular-text" placeholder="e.g. gpt-4o-mini">
+					class="regular-text" placeholder="e.g. gemini-2.5-flash">
 				<p class="description">
-					<?php esc_html_e( 'Leave empty for provider default. Examples: gpt-4o-mini, deepseek-chat, claude-haiku-4-5-20251001', 'cclee-toolkit' ); ?>
+					<?php esc_html_e( 'Leave empty for provider default. Examples: gemini-2.5-flash, gemini-2.5-flash-lite, gpt-4o-mini, deepseek-chat', 'cclee-toolkit' ); ?>
 				</p>
 			</td>
 		</tr>
@@ -212,6 +225,7 @@ function cclee_toolkit_render_general(): void {
 			<td>
 				<fieldset>
 					<?php $ai_enabled = (bool) get_option( 'cclee_toolkit_ai_enabled', false ); ?>
+					<input type="hidden" name="cclee_toolkit_alt_auto_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_alt_auto_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_alt_auto_enabled', false ), true ); ?>
@@ -222,6 +236,7 @@ function cclee_toolkit_render_general(): void {
 						<p class="description" style="color:#d63638;"><?php esc_html_e( 'Requires AI module enabled above.', 'cclee-toolkit' ); ?></p>
 					<?php endif; ?>
 					<br><br>
+					<input type="hidden" name="cclee_toolkit_alt_batch_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_alt_batch_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_alt_batch_enabled', false ), true ); ?>>
@@ -258,6 +273,7 @@ function cclee_toolkit_render_general(): void {
 			<th scope="row"><?php esc_html_e( 'Case Study CPT', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
+					<input type="hidden" name="cclee_toolkit_case_study_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_case_study_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_case_study_enabled', true ), true ); ?>>
@@ -287,6 +303,7 @@ function cclee_toolkit_render_seo(): void {
 			<th scope="row"><?php esc_html_e( 'Master Switch', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
+					<input type="hidden" name="cclee_toolkit_seo_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_seo_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_seo_enabled', true ), true ); ?>>
@@ -341,6 +358,7 @@ function cclee_toolkit_render_seo(): void {
 			<th scope="row"><?php esc_html_e( 'Indexing', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
+					<input type="hidden" name="cclee_toolkit_seo_indexnow_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_seo_indexnow_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_seo_indexnow_enabled', false ), true ); ?>>
@@ -369,6 +387,7 @@ function cclee_toolkit_render_seo(): void {
 				<hr style="margin:1.5em 0;">
 				<h4 style="margin-bottom:0.5em;"><?php esc_html_e( 'Google Indexing API', 'cclee-toolkit' ); ?></h4>
 				<fieldset>
+					<input type="hidden" name="cclee_toolkit_seo_google_indexing_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_seo_google_indexing_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_seo_google_indexing_enabled', false ), true ); ?>>
@@ -414,6 +433,8 @@ function cclee_toolkit_render_seo(): void {
 			<th scope="row"><?php esc_html_e( 'Open Graph', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
+					<input type="hidden" name="cclee_toolkit_seo_og_enabled" value="0">
+					<input type="hidden" name="cclee_toolkit_seo_jsonld_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_seo_og_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_seo_og_enabled', true ), true ); ?>>
@@ -423,6 +444,7 @@ function cclee_toolkit_render_seo(): void {
 					<br>
 					<label>
 						<input type="checkbox" name="cclee_toolkit_seo_jsonld_enabled" value="1"
+							<?php checked( get_option( 'cclee_toolkit_seo_jsonld_enabled', true ), true ); ?>>
 							<?php checked( get_option( 'cclee_toolkit_seo_jsonld_enabled', true ), true ); ?>>
 						<?php esc_html_e( 'Output JSON-LD Schema (WebPage / Article structured data)', 'cclee-toolkit' ); ?>
 					</label>
@@ -434,6 +456,7 @@ function cclee_toolkit_render_seo(): void {
 			<th scope="row"><?php esc_html_e( 'llms.txt', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
+					<input type="hidden" name="cclee_toolkit_llms_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_llms_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_llms_enabled', false ), true ); ?>>
@@ -523,45 +546,68 @@ add_action( 'admin_footer', function() {
 			});
 		}
 
-		// Alt Batch Processing
+		// Alt Batch Processing (auto-continue until all done)
 		var batchBtn = document.getElementById('cclee-alt-batch-btn');
 		if (batchBtn) {
 			batchBtn.addEventListener('click', function() {
 				var batchSize = document.getElementById('cclee-alt-batch-size').value || 10;
 				var resultEl = document.getElementById('cclee-alt-batch-result');
+				var sizeInput = document.getElementById('cclee-alt-batch-size');
+				var totalSuccess = 0;
+				var totalFailed = 0;
+				var isRunning = false;
+
 				resultEl.style.display = 'block';
 				resultEl.style.color = '';
-				resultEl.textContent = '<?php esc_html_e( 'Processing...', 'cclee-toolkit' ); ?>';
 				batchBtn.disabled = true;
+				batchBtn.textContent = '<?php esc_html_e( 'Processing...', 'cclee-toolkit' ); ?>';
+				sizeInput.disabled = true;
+				isRunning = true;
 
-				jQuery.ajax({
-					url: '<?php echo esc_url( rest_url( 'cclee-toolkit/v1/seo/alt-batch' ) ); ?>',
-					method: 'POST',
-					beforeSend: function(xhr) {
-						xhr.setRequestHeader('X-WP-Nonce', '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>');
-					},
-					data: JSON.stringify({ batch_size: parseInt(batchSize) }),
-					contentType: 'application/json',
-					success: function(data) {
-						batchBtn.disabled = false;
-						resultEl.textContent = '<?php esc_html_e( 'Processed', 'cclee-toolkit' ); ?>: ' + data.processed +
-							' | <?php esc_html_e( 'Success', 'cclee-toolkit' ); ?>: ' + data.success +
-							' | <?php esc_html_e( 'Failed', 'cclee-toolkit' ); ?>: ' + data.failed +
-							' | <?php esc_html_e( 'Remaining', 'cclee-toolkit' ); ?>: ' + data.remaining;
+				function runBatch() {
+					if (!isRunning) return;
 
-						if (data.remaining > 0) {
+					jQuery.ajax({
+						url: '<?php echo esc_url( rest_url( 'cclee-toolkit/v1/seo/alt-batch' ) ); ?>',
+						method: 'POST',
+						beforeSend: function(xhr) {
+							xhr.setRequestHeader('X-WP-Nonce', '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>');
+						},
+						data: JSON.stringify({ batch_size: parseInt(batchSize) }),
+						contentType: 'application/json',
+						success: function(data) {
+							totalSuccess += data.success;
+							totalFailed += data.failed;
+
+							resultEl.textContent =
+								'<?php esc_html_e( 'Done', 'cclee-toolkit' ); ?>: ' + (totalSuccess + totalFailed) +
+								' | <?php esc_html_e( 'Success', 'cclee-toolkit' ); ?>: ' + totalSuccess +
+								' | <?php esc_html_e( 'Failed', 'cclee-toolkit' ); ?>: ' + totalFailed +
+								' | <?php esc_html_e( 'Remaining', 'cclee-toolkit' ); ?>: ' + data.remaining;
+
+							if (data.remaining > 0) {
+								setTimeout(runBatch, 300);
+							} else {
+								isRunning = false;
+								batchBtn.textContent = '<?php esc_html_e( 'All Done', 'cclee-toolkit' ); ?>';
+								sizeInput.disabled = false;
+							}
+						},
+						error: function() {
+							isRunning = false;
+							sizeInput.disabled = false;
+							resultEl.style.color = 'red';
+							resultEl.textContent = '<?php esc_html_e( 'Request failed.', 'cclee-toolkit' ); ?>' +
+								' (<?php esc_html_e( 'Done', 'cclee-toolkit' ); ?>: ' + (totalSuccess + totalFailed) +
+								' | <?php esc_html_e( 'Success', 'cclee-toolkit' ); ?>: ' + totalSuccess +
+								' | <?php esc_html_e( 'Failed', 'cclee-toolkit' ); ?>: ' + totalFailed + ')';
 							batchBtn.textContent = '<?php esc_html_e( 'Continue Batch Processing', 'cclee-toolkit' ); ?>';
-						} else {
-							batchBtn.textContent = '<?php esc_html_e( 'All Done', 'cclee-toolkit' ); ?>';
-							batchBtn.disabled = true;
+							batchBtn.disabled = false;
 						}
-					},
-					error: function() {
-						batchBtn.disabled = false;
-						resultEl.style.color = 'red';
-						resultEl.textContent = '<?php esc_html_e( 'Request failed.', 'cclee-toolkit' ); ?>';
-					}
-				});
+					});
+				}
+
+				runBatch();
 			});
 		}
 	})();
@@ -618,6 +664,7 @@ function cclee_toolkit_render_woo(): void {
 			<th scope="row"><?php esc_html_e( 'Product Schema', 'cclee-toolkit' ); ?></th>
 			<td>
 				<fieldset>
+					<input type="hidden" name="cclee_toolkit_woo_schema_enabled" value="0">
 					<label>
 						<input type="checkbox" name="cclee_toolkit_woo_schema_enabled" value="1"
 							<?php checked( get_option( 'cclee_toolkit_woo_schema_enabled', true ), true ); ?>>

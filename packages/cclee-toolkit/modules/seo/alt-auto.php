@@ -67,6 +67,11 @@ function cclee_toolkit_alt_call_ai( string $prompt ) {
 			? rtrim( $base_url, '/' ) . '/chat/completions'
 			: ( $endpoints[ $provider ] ?? $endpoints['openai'] );
 
+		$max_tokens = 100;
+		if ( 'custom' === $provider && ! empty( $base_url ) ) {
+			$max_tokens = 500;
+		}
+
 		$response = wp_remote_post( $endpoint, [
 			'headers' => [
 				'Content-Type'  => 'application/json',
@@ -78,7 +83,7 @@ function cclee_toolkit_alt_call_ai( string $prompt ) {
 					[ 'role' => 'system', 'content' => $system ],
 					[ 'role' => 'user', 'content' => $prompt ],
 				],
-				'max_tokens' => 100,
+				'max_tokens' => $max_tokens,
 			] ),
 			'timeout' => 30,
 		] );
