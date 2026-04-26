@@ -92,7 +92,7 @@ add_action( 'template_redirect', function () {
 	}
 
 	header( 'Content-Type: text/plain; charset=UTF-8' );
-	echo wp_strip_all_tags( implode( "\n", $lines ) );
+	echo wp_strip_all_tags( implode( "\n", $lines ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- plain text output, already sanitized
 	exit;
 } );
 

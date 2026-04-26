@@ -62,17 +62,38 @@ add_action( 'admin_init', function() {
 		] );
 	}
 
-	// Text / select / textarea options — default sanitize is fine
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_api_key' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_provider' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_base_url' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_model' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_google' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_bing' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_yandex' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_indexnow_key' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_google_service_account' );
-	register_setting( 'cclee_toolkit', 'cclee_toolkit_llms_extra', [ 'default' => '' ] );
+	// Text / select / textarea options
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_api_key', [
+		'sanitize_callback' => 'sanitize_text_field',
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_provider', [
+		'sanitize_callback' => 'sanitize_key',
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_base_url', [
+		'sanitize_callback' => 'esc_url_raw',
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_ai_model', [
+		'sanitize_callback' => 'sanitize_text_field',
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_google', [
+		'sanitize_callback' => 'sanitize_text_field',
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_bing', [
+		'sanitize_callback' => 'sanitize_text_field',
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_verify_yandex', [
+		'sanitize_callback' => 'sanitize_text_field',
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_indexnow_key', [
+		'sanitize_callback' => 'sanitize_key',
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_seo_google_service_account', [
+		'sanitize_callback' => 'sanitize_textarea_field',
+	] );
+	register_setting( 'cclee_toolkit', 'cclee_toolkit_llms_extra', [
+		'sanitize_callback' => 'sanitize_textarea_field',
+		'default' => '',
+	] );
 	register_setting( 'cclee_toolkit', 'cclee_toolkit_alt_max_tokens', [
 		'sanitize_callback' => function( $value ) {
 			$v = absint( $value );
@@ -381,7 +402,9 @@ function cclee_toolkit_render_alt(): void {
 					<p style="margin:0 0 0.5em;">
 						<strong><?php esc_html_e( 'Batch Processing', 'cclee-toolkit' ); ?></strong>
 						&mdash;
-						<?php printf( esc_html__( 'Images to process: %d', 'cclee-toolkit' ), $img_count ); ?>
+						<?php
+						/* translators: %d: number of images to process */
+						printf( esc_html__( 'Images to process: %d', 'cclee-toolkit' ), (int) $img_count ); ?>
 					</p>
 					<p style="margin:0 0 0.5em;">
 						<label><?php esc_html_e( 'Batch size', 'cclee-toolkit' ); ?>
@@ -506,7 +529,9 @@ function cclee_toolkit_render_seo(): void {
 					$key_url = home_url( '/' . $indexnow_key . '.txt' );
 					?>
 					<p class="description">
-						<?php printf( esc_html__( 'Key file hosted at: %s', 'cclee-toolkit' ), '<code>' . esc_url( $key_url ) . '</code>' ); ?>
+						<?php
+						/* translators: %s: URL of the IndexNow key file */
+						printf( esc_html__( 'Key file hosted at: %s', 'cclee-toolkit' ), '<code>' . esc_url( $key_url ) . '</code>' ); ?>
 					</p>
 				<?php endif; ?>
 
@@ -593,6 +618,7 @@ function cclee_toolkit_render_seo(): void {
 					<p class="description" style="margin-top:0.5em;">
 						<?php
 						printf(
+							/* translators: %s: URL of the llms.txt file */
 							esc_html__( 'Accessible at: %s', 'cclee-toolkit' ),
 							'<code>' . esc_url( home_url( '/llms.txt' ) ) . '</code>'
 						);

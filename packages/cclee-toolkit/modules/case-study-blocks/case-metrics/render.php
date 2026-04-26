@@ -19,7 +19,7 @@ if ( empty( $metrics ) ) {
 	return;
 }
 ?>
-<div <?php echo get_block_wrapper_attributes( array( 'class' => 'cclee-case-metrics' ) ); ?>>
+<div <?php echo get_block_wrapper_attributes( array( 'class' => 'cclee-case-metrics' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<?php foreach ( $metrics as $metric ) : ?>
 	<div class="cclee-case-metrics__item">
 		<span class="cclee-case-metrics__value"><?php echo esc_html( $metric['value'] ); ?></span>

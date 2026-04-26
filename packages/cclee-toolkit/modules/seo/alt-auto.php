@@ -180,14 +180,14 @@ function cclee_toolkit_alt_build_prompt( int $attachment_id ): string {
 		}
 
 		// 简短描述 (前200字符)
-		$short_desc = strip_tags( $product->get_short_description() );
+		$short_desc = wp_strip_all_tags( $product->get_short_description() );
 		$short_desc = trim( mb_substr( $short_desc, 0, 200 ) );
 		if ( $short_desc ) {
 			$parts[] = sprintf( 'Short description: %s', $short_desc );
 		}
 
 		// 完整描述 (前300字符)
-		$desc = strip_tags( $product->get_description() );
+		$desc = wp_strip_all_tags( $product->get_description() );
 		$desc = trim( mb_substr( $desc, 0, 300 ) );
 		if ( $desc ) {
 			$parts[] = sprintf( 'Description: %s', $desc );
@@ -235,7 +235,7 @@ function cclee_toolkit_alt_build_prompt( int $attachment_id ): string {
 			if ( $parent_title ) {
 				$parts[] = sprintf( 'Used in post: "%s"', $parent_title );
 			}
-			$parent_content = strip_tags( get_post_field( 'post_content', $parent_id ) );
+			$parent_content = wp_strip_all_tags( get_post_field( 'post_content', $parent_id ) );
 			$parent_content = trim( mb_substr( $parent_content, 0, 300 ) );
 			if ( $parent_content ) {
 				$parts[] = sprintf( 'Post content: %s', $parent_content );

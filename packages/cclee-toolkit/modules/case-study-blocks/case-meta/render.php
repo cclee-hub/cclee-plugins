@@ -21,7 +21,7 @@ if ( ! $duration && ! $size ) {
 	return;
 }
 ?>
-<div <?php echo get_block_wrapper_attributes( array( 'class' => 'cclee-case-meta' ) ); ?>>
+<div <?php echo get_block_wrapper_attributes( array( 'class' => 'cclee-case-meta' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<?php if ( $duration ) : ?>
 	<div class="cclee-case-meta__item">
 		<span class="cclee-case-meta__label"><?php esc_html_e( 'Duration', 'cclee-toolkit' ); ?></span>

@@ -22,7 +22,7 @@ if ( ! $client_name && ! $client_logo && ! $client_size ) {
 	return;
 }
 ?>
-<div <?php echo get_block_wrapper_attributes( array( 'class' => 'cclee-case-hero' ) ); ?>>
+<div <?php echo get_block_wrapper_attributes( array( 'class' => 'cclee-case-hero' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<?php if ( $client_logo ) : ?>
 	<div class="cclee-case-hero__logo">
 		<?php echo wp_get_attachment_image( absint( $client_logo ), 'medium', false, array( 'class' => 'cclee-case-hero__logo-img' ) ); ?>

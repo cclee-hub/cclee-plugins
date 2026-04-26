@@ -29,7 +29,7 @@ add_action( 'wp_ajax_cclee_manual_submit_url', function() {
 	}
 
 	// Whitelist channels
-	$channels_raw = isset( $_POST['channels'] ) ? (array) $_POST['channels'] : array();
+	$channels_raw = isset( $_POST['channels'] ) ? (array) wp_unslash( $_POST['channels'] ) : array();
 	$channels     = array();
 	foreach ( $channels_raw as $ch ) {
 		$sanitized = sanitize_text_field( wp_unslash( $ch ) );

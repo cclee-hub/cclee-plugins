@@ -41,7 +41,7 @@ add_action( 'wp_head', function () {
 
 	// Description: strip tags + truncate to 500 chars
 	$raw_desc = get_the_content();
-	$desc     = wp_trim_words( wp_strip_all_tags( strip_tags( $raw_desc ) ), 80, '' );
+	$desc     = wp_trim_words( wp_strip_all_tags( $raw_desc ), 80, '' );
 	if ( mb_strlen( $desc ) > 500 ) {
 		$desc = mb_substr( $desc, 0, 500 );
 	}

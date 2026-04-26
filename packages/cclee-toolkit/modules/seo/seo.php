@@ -58,7 +58,7 @@ add_action( 'wp_head', function () {
 
 	if ( $output ) {
 		echo "\n<!-- CCLEE Toolkit: Site Verification -->\n";
-		echo $output;
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }, 0 );
 
@@ -126,19 +126,16 @@ add_action( 'wp_head', function () {
 	$desc  = $desc ?: get_bloginfo( 'description' );
 	$url   = $url ?: home_url( '/' );
 
-	// 转义
-	$title = esc_attr( $title );
-	$desc  = esc_attr( wp_trim_words( $desc, 160 ) );
-	$url   = esc_url( $url );
-	$image = $image ? esc_url( $image ) : '';
+	// Trim description
+	$desc = wp_trim_words( $desc, 160 );
 
 	echo "\n<!-- CCLEE Toolkit: Open Graph / Twitter Card -->\n";
 
 	// Open Graph
 	printf( '<meta property="og:site_name" content="%s" />' . "\n", esc_attr( $site_name ) );
-	printf( '<meta property="og:title" content="%s" />' . "\n", $title );
-	printf( '<meta property="og:description" content="%s" />' . "\n", $desc );
-	printf( '<meta property="og:url" content="%s" />' . "\n", $url );
+	printf( '<meta property="og:title" content="%s" />' . "\n", esc_attr( $title ) );
+	printf( '<meta property="og:description" content="%s" />' . "\n", esc_attr( $desc ) );
+	printf( '<meta property="og:url" content="%s" />' . "\n", esc_url( $url ) );
 	// og:type: defer to product-specific output on product pages
 	$is_product_page = function_exists( 'is_product' ) && is_product();
 	if ( ! $is_product_page ) {
@@ -146,16 +143,16 @@ add_action( 'wp_head', function () {
 	}
 
 	if ( $image ) {
-		printf( '<meta property="og:image" content="%s" />' . "\n", $image );
+		printf( '<meta property="og:image" content="%s" />' . "\n", esc_url( $image ) );
 	}
 
 	// Twitter Card
 	printf( '<meta name="twitter:card" content="summary_large_image" />' . "\n" );
-	printf( '<meta name="twitter:title" content="%s" />' . "\n", $title );
-	printf( '<meta name="twitter:description" content="%s" />' . "\n", $desc );
+	printf( '<meta name="twitter:title" content="%s" />' . "\n", esc_attr( $title ) );
+	printf( '<meta name="twitter:description" content="%s" />' . "\n", esc_attr( $desc ) );
 
 	if ( $image ) {
-		printf( '<meta name="twitter:image" content="%s" />' . "\n", $image );
+		printf( '<meta name="twitter:image" content="%s" />' . "\n", esc_url( $image ) );
 	}
 
 	// WooCommerce Product OG extension

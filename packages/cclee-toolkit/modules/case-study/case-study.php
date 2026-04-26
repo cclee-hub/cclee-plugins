@@ -184,48 +184,50 @@ function cclee_toolkit_render_case_study_meta_box( $post ) {
 		.cclee-toolkit-metric-item h4 { margin: 0 0 10px 0; }
 	</style>
 
-	<h3><?php _e( 'Client Information', 'cclee-toolkit' ); ?></h3>
+	<h3><?php esc_html_e('Client Information', 'cclee-toolkit' ); ?></h3>
 	<div class="cclee-toolkit-meta-field">
-		<label for="client_name"><?php _e( 'Client Name', 'cclee-toolkit' ); ?></label>
+		<label for="client_name"><?php esc_html_e('Client Name', 'cclee-toolkit' ); ?></label>
 		<input type="text" id="client_name" name="client_name" value="<?php echo esc_attr( $client_name ); ?>">
 	</div>
 	<div class="cclee-toolkit-meta-field">
-		<label for="project_duration"><?php _e( 'Project Duration', 'cclee-toolkit' ); ?></label>
+		<label for="project_duration"><?php esc_html_e('Project Duration', 'cclee-toolkit' ); ?></label>
 		<input type="text" id="project_duration" name="project_duration" value="<?php echo esc_attr( $project_duration ); ?>" placeholder="e.g., 6 months">
 	</div>
 	<div class="cclee-toolkit-meta-field">
-		<label for="client_size"><?php _e( 'Company Size', 'cclee-toolkit' ); ?></label>
+		<label for="client_size"><?php esc_html_e('Company Size', 'cclee-toolkit' ); ?></label>
 		<input type="text" id="client_size" name="client_size" value="<?php echo esc_attr( $client_size ); ?>" placeholder="e.g., 100-500 employees">
 	</div>
 
-	<h3><?php _e( 'Results Metrics', 'cclee-toolkit' ); ?></h3>
+	<h3><?php esc_html_e('Results Metrics', 'cclee-toolkit' ); ?></h3>
 	<div class="cclee-toolkit-metrics-grid">
 		<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
 		<div class="cclee-toolkit-metric-item">
-			<h4><?php printf( __( 'Metric %d', 'cclee-toolkit' ), $i ); ?></h4>
+			<h4><?php
+			/* translators: %d: metric number (1-4) */
+			printf( esc_html__( 'Metric %d', 'cclee-toolkit' ), (int) $i ); ?></h4>
 			<div class="cclee-toolkit-meta-field">
-				<label><?php _e( 'Value', 'cclee-toolkit' ); ?></label>
-				<input type="text" name="metric_<?php echo $i; ?>_value" value="<?php echo esc_attr( $metrics[$i]['value'] ); ?>" placeholder="e.g., +150%">
+				<label><?php esc_html_e('Value', 'cclee-toolkit' ); ?></label>
+				<input type="text" name="metric_<?php echo (int) $i; ?>_value" value="<?php echo esc_attr( $metrics[$i]['value'] ); ?>" placeholder="e.g., +150%">
 			</div>
 			<div class="cclee-toolkit-meta-field">
-				<label><?php _e( 'Label', 'cclee-toolkit' ); ?></label>
-				<input type="text" name="metric_<?php echo $i; ?>_label" value="<?php echo esc_attr( $metrics[$i]['label'] ); ?>" placeholder="e.g., Revenue Growth">
+				<label><?php esc_html_e('Label', 'cclee-toolkit' ); ?></label>
+				<input type="text" name="metric_<?php echo (int) $i; ?>_label" value="<?php echo esc_attr( $metrics[$i]['label'] ); ?>" placeholder="e.g., Revenue Growth">
 			</div>
 		</div>
 		<?php endfor; ?>
 	</div>
 
-	<h3><?php _e( 'Client Testimonial', 'cclee-toolkit' ); ?></h3>
+	<h3><?php esc_html_e('Client Testimonial', 'cclee-toolkit' ); ?></h3>
 	<div class="cclee-toolkit-meta-field">
-		<label for="testimonial_content"><?php _e( 'Testimonial', 'cclee-toolkit' ); ?></label>
+		<label for="testimonial_content"><?php esc_html_e('Testimonial', 'cclee-toolkit' ); ?></label>
 		<textarea id="testimonial_content" name="testimonial_content"><?php echo esc_textarea( $testimonial_content ); ?></textarea>
 	</div>
 	<div class="cclee-toolkit-meta-field">
-		<label for="testimonial_author"><?php _e( 'Author Name', 'cclee-toolkit' ); ?></label>
+		<label for="testimonial_author"><?php esc_html_e('Author Name', 'cclee-toolkit' ); ?></label>
 		<input type="text" id="testimonial_author" name="testimonial_author" value="<?php echo esc_attr( $testimonial_author ); ?>">
 	</div>
 	<div class="cclee-toolkit-meta-field">
-		<label for="testimonial_title"><?php _e( 'Author Title', 'cclee-toolkit' ); ?></label>
+		<label for="testimonial_title"><?php esc_html_e('Author Title', 'cclee-toolkit' ); ?></label>
 		<input type="text" id="testimonial_title" name="testimonial_title" value="<?php echo esc_attr( $testimonial_title ); ?>" placeholder="e.g., CEO">
 	</div>
 	<?php
@@ -239,7 +241,7 @@ function cclee_toolkit_save_case_study_meta( $post_id ) {
 		return;
 	}
 
-	if ( ! wp_verify_nonce( $_POST['cclee_toolkit_case_study_meta_nonce'], 'cclee_toolkit_case_study_meta' ) ) {
+	if ( ! wp_verify_nonce( wp_unslash( $_POST['cclee_toolkit_case_study_meta_nonce'] ), 'cclee_toolkit_case_study_meta' ) ) {
 		return;
 	}
 
@@ -255,17 +257,17 @@ function cclee_toolkit_save_case_study_meta( $post_id ) {
 	$fields = array( 'client_name', 'project_duration', 'client_size', 'testimonial_content', 'testimonial_author', 'testimonial_title' );
 	foreach ( $fields as $field ) {
 		if ( isset( $_POST[$field] ) ) {
-			update_post_meta( $post_id, $field, sanitize_text_field( $_POST[$field] ) );
+			update_post_meta( $post_id, $field, sanitize_text_field( wp_unslash( $_POST[$field] ) ) );
 		}
 	}
 
 	// 保存 metrics
 	for ( $i = 1; $i <= 4; $i++ ) {
 		if ( isset( $_POST["metric_{$i}_value"] ) ) {
-			update_post_meta( $post_id, "metric_{$i}_value", sanitize_text_field( $_POST["metric_{$i}_value"] ) );
+			update_post_meta( $post_id, "metric_{$i}_value", sanitize_text_field( wp_unslash( $_POST["metric_{$i}_value"] ) ) );
 		}
 		if ( isset( $_POST["metric_{$i}_label"] ) ) {
-			update_post_meta( $post_id, "metric_{$i}_label", sanitize_text_field( $_POST["metric_{$i}_label"] ) );
+			update_post_meta( $post_id, "metric_{$i}_label", sanitize_text_field( wp_unslash( $_POST["metric_{$i}_label"] ) ) );
 		}
 	}
 }

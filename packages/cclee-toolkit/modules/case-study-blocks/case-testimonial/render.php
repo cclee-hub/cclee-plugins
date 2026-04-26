@@ -22,7 +22,7 @@ if ( ! $content ) {
 	return;
 }
 ?>
-<div <?php echo get_block_wrapper_attributes( array( 'class' => 'cclee-case-testimonial' ) ); ?>>
+<div <?php echo get_block_wrapper_attributes( array( 'class' => 'cclee-case-testimonial' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<blockquote class="cclee-case-testimonial__quote">
 		<p><?php echo esc_html( $content ); ?></p>
 	</blockquote>

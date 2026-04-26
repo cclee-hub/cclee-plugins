@@ -1,94 +1,106 @@
 === CCLEE Toolkit ===
-Contributors: cclee-hub
+Contributors: ccleeai
 Tags: ai, seo, case-study, custom-post-type, block-editor
 Requires at least: 6.4
-Tested up to: 6.7
+Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-B端企业官网增强工具包：AI内容辅助、SEO优化、案例展示CPT。
+A modular enhancement toolkit for business websites: AI-assisted content, SEO optimization, and case study management.
 
 == Description ==
 
-CCLEE Toolkit 是 CCLEE 主题的官方配套插件，专为 B 端企业官网设计。
+CCLEE Toolkit is the official companion plugin for the CCLEE theme, designed for business and corporate websites. Each module can be toggled independently.
 
-= 功能模块（可独立开关）=
+= Modules (individually toggleable) =
 
-* **AI Assistant** - 编辑器内 AI 辅助内容生成（默认关闭，需手动配置 API Key）
-* **SEO Enhancer** - 自动输出 Open Graph、Twitter Card、JSON-LD Schema
-* **Case Study CPT** - 案例展示自定义文章类型，含客户信息、成果指标、评价字段
+* **AI Assistant** - AI-powered content generation in the block editor sidebar (disabled by default; requires API key)
+* **SEO Enhancer** - Automatic Open Graph, Twitter Card, and JSON-LD Schema output
+* **Case Study CPT** - Custom post type for case studies with client info, results metrics, and testimonials
+* **Image Alt AI** - Auto-generate and batch-process image alt text using AI
+* **WooCommerce Schema** - Product structured data for rich results in search engines
 
-= 使用场景 =
+= Use Cases =
 
-* 企业官网案例展示
-* B2B 产品/服务介绍
-* 内容营销支持
+* Business website case study showcases
+* B2B product and service presentations
+* Content marketing support with AI
 
-= 配套主题 =
+= Companion Theme =
 
-本插件为 [CCLEE Theme](https://github.com/cclee-hub/cclee-theme) 的官方配套插件，但也可独立使用。
+This plugin is the official companion for [CCLEE Theme](https://github.com/cclee-hub/cclee-theme) but works independently with any theme.
 
 == Installation ==
 
-1. 上传插件到 `/wp-content/plugins/cclee-toolkit/`
-2. 激活插件
-3. 进入 设置 → CCLEE Toolkit 启用所需模块
-4. 如需 AI 功能，配置 OpenAI API Key
+1. Upload the plugin to `/wp-content/plugins/cclee-toolkit/`
+2. Activate the plugin
+3. Navigate to Settings > CCLEE Toolkit to enable desired modules
+4. For AI features, configure an API key in the General tab
 
 == Frequently Asked Questions ==
 
-= 是否必须配合 CCLEE 主题使用？ =
+= Do I need the CCLEE theme to use this plugin? =
 
-不必须。插件可独立使用，但与 CCLEE 主题配合使用效果最佳。
+No. The plugin works with any theme, but pairs best with CCLEE for full design integration.
 
-= AI 功能支持哪些 API？ =
+= Which AI APIs are supported? =
 
-支持 OpenAI API 或兼容的 API 服务（如 Azure OpenAI）。
+OpenAI, DeepSeek, Anthropic (Claude), or any OpenAI-compatible API endpoint.
 
-= 如何禁用某个模块？ =
+= How do I disable a module? =
 
-进入 设置 → CCLEE Toolkit，取消勾选对应模块即可。
+Go to Settings > CCLEE Toolkit and uncheck the module you want to disable.
 
 == External Services ==
 
-This plugin optionally connects to OpenAI API for AI content generation.
+This plugin optionally connects to external AI services for content generation.
 
-= AI Assistant Module =
-* Service: OpenAI API
-* API Endpoint: https://api.openai.com/v1/chat/completions
-* Data Sent: User-provided prompt/topic for content generation
-* Privacy Policy: https://openai.com/privacy
-* Opt-in: Module is disabled by default; API Key must be configured manually
+= AI Assistant / Image Alt Module =
+* Service: User-selected AI provider (OpenAI, DeepSeek, Anthropic, or custom endpoint)
+* Data Sent: User-provided prompt or image context for content generation
+* Privacy Policy (OpenAI): https://openai.com/privacy
+* Privacy Policy (Anthropic): https://www.anthropic.com/privacy
+* Opt-in: AI module is disabled by default; API key must be configured manually
+
+= IndexNow =
+* Service: IndexNow protocol (Bing, Yandex, and compatible search engines)
+* Data Sent: Site URLs when content is published or updated
+* Opt-in: Disabled by default
+
+= Google Indexing API =
+* Service: Google Indexing API via user-provided Service Account
+* Data Sent: Site URLs for indexing requests
+* Opt-in: Disabled by default; requires Google Cloud Service Account
 
 == Changelog ==
 
+= 1.1.4 =
+* Add WooCommerce Product Schema and BreadcrumbList structured data
+* Add Image Alt AI: auto-generate alt text on upload, batch processing
+* Add llms.txt generator for LLM crawlers
+* Add IndexNow and Google Indexing API integration
+* Add manual URL submission to search engines
+* Fix output escaping and input sanitization across all modules
+* Tested up to WordPress 6.9
+
+= 1.1.0 =
+* Add DeepSeek and Anthropic (Claude) AI provider support
+* Add custom OpenAI-compatible API endpoint option
+* Add Case Study block types (Hero, Metrics, Meta, Testimonial)
+* Improve SEO module with per-page meta title, description, and robots controls
+
 = 1.0.0 =
-* 首次发布
-* 从 CCLEE 主题分离 AI、SEO、Case Study 功能
-* 添加模块独立开关
+* Initial release
+* AI content assistant in block editor
+* SEO Enhancer (Open Graph, Twitter Card, JSON-LD)
+* Case Study CPT with industry taxonomy
 
 == Upgrade Notice ==
 
+= 1.1.4 =
+WooCommerce Schema, Image Alt AI, IndexNow, and llms.txt modules added. Security improvements.
+
 = 1.0.0 =
-首次发布版本。
-
-== Additional Info ==
-
-= 模块说明 =
-
-**AI Assistant**
-- 在块编辑器侧边栏添加 AI 辅助面板
-- 支持生成段落、标题、列表、CTA、FAQ
-- API Key 安全存储在服务端
-
-**SEO Enhancer**
-- 自动输出 Open Graph 标签
-- 自动输出 Twitter Card 标签
-- 自动输出 JSON-LD Schema（Article/WebPage）
-
-**Case Study CPT**
-- 自定义文章类型：case-study
-- 自定义分类法：case-industry（行业分类）
-- Meta 字段：客户名称、项目周期、公司规模、成果指标、客户评价
+Initial release.
