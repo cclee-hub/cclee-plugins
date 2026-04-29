@@ -270,6 +270,9 @@ class CCLEE_Shipping_Label_Test {
 			'timeout' => 30,
 		);
 
+		$this->log( 'FedEx Ship request URL: ' . $url );
+		$this->log( 'FedEx Ship request payload: ' . wp_json_encode( $payload ) );
+
 		$response = wp_remote_post( $url, $args );
 
 		if ( is_wp_error( $response ) ) {
@@ -279,8 +282,12 @@ class CCLEE_Shipping_Label_Test {
 			);
 		}
 
-		$code = wp_remote_retrieve_response_code( $response );
-		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+		$code        = wp_remote_retrieve_response_code( $response );
+		$raw_body    = wp_remote_retrieve_body( $response );
+		$body        = json_decode( $raw_body, true );
+
+		$this->log( 'FedEx Ship response status: ' . $code );
+		$this->log( 'FedEx Ship response body: ' . $raw_body );
 
 		if ( 200 !== $code ) {
 			$error_msg = $this->extract_error_message( $body );
@@ -355,5 +362,14 @@ class CCLEE_Shipping_Label_Test {
 	 */
 	private function get_base_url( string $environment ): string {
 		return 'production' === $environment ? self::PRODUCTION_URL : self::SANDBOX_URL;
+	}
+
+	/**
+	 * Log to WooCommerce logger (always, for label test debugging).
+	 *
+	 * @param string $message Log message.
+	 */
+	private function log( string $message ): void {
+		wc_get_logger()->info( $message, array( 'source' => 'cclee-shipping-label-test' ) );
 	}
 }
