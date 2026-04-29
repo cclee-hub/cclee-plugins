@@ -3,7 +3,7 @@
  * Plugin Name: CCLEE Shipping
  * Plugin URI: https://github.com/cclee-hub/cclee-shipping
  * Description: Multi-carrier shipping for WooCommerce. FedEx + SF Express real-time rates.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Requires at least: 6.4
  * Requires PHP: 8.0
  * Author: CCLEE
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CCLEE_SHIPPING_VERSION', '1.1.0' );
+define( 'CCLEE_SHIPPING_VERSION', '1.2.0' );
 define( 'CCLEE_SHIPPING_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CCLEE_SHIPPING_URL', plugin_dir_url( __FILE__ ) );
 
@@ -69,6 +69,11 @@ function cclee_shipping_register_methods( array $methods ): array {
 // Address validation AJAX endpoint.
 add_action( 'wp_ajax_cclee_shipping_validate_address', array( 'CCLEE_Shipping_Address_Validator', 'ajax_validate' ) );
 add_action( 'wp_ajax_nopriv_cclee_shipping_validate_address', array( 'CCLEE_Shipping_Address_Validator', 'ajax_validate' ) );
+
+// Admin tools page (label test).
+require_once CCLEE_SHIPPING_PATH . 'includes/class-label-test.php';
+require_once CCLEE_SHIPPING_PATH . 'includes/class-admin-tools-page.php';
+CCLEE_Shipping_Admin_Tools_Page::init();
 
 // Frontend assets.
 add_action( 'wp_enqueue_scripts', 'cclee_shipping_enqueue_assets' );

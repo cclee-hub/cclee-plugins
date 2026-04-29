@@ -6,7 +6,7 @@ Tested up to: 6.9
 Requires PHP: 8.0
 WC requires at least: 8.0
 WC tested up to: 10.6.2
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,12 @@ Yes. CCLEE Shipping uses the standard WooCommerce shipping method API and is ful
 Yes. CCLEE Shipping is compatible with WooCommerce High-Performance Order Storage (HPOS).
 
 == Changelog ==
+
+= 1.2.0 =
+* Added Label Test admin tool (WooCommerce > Label Test)
+* FedEx Ship API integration for test label generation (PDF 4x6)
+* Preview, download, and print support for generated labels
+* Reuses FedEx credentials from shipping zone settings
 
 = 1.1.0 =
 * Added SF Express carrier (real-time rates via EXP_RECE_QUERY_DELIVERTM)

@@ -1,0 +1,41 @@
+.cclee-shipping-tools-status {
+	max-width: 600px;
+	margin-bottom: 20px;
+}
+
+.cclee-shipping-tools-status h2,
+.cclee-shipping-tools-action h2,
+.cclee-shipping-tools-result h2 {
+	font-size: 14px;
+	font-weight: 600;
+	margin: 16px 0 8px;
+}
+
+.cclee-shipping-tools-action {
+	margin: 20px 0;
+}
+
+.cclee-shipping-tools-action .description {
+	margin-bottom: 12px;
+}
+
+.cclee-shipping-status-ok {
+	color: #0a8054;
+	font-weight: 600;
+}
+
+.cclee-shipping-status-err {
+	color: #d63638;
+	font-weight: 600;
+}
+
+.cclee-shipping-label-actions {
+	margin: 16px 0;
+	display: flex;
+	gap: 8px;
+}
+
+#cclee-shipping-preview-container {
+	margin-top: 16px;
+	max-width: 650px;
+}
