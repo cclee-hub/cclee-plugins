@@ -112,7 +112,7 @@ class CCLEE_Shipping_Label_Test {
 	 * @param array $credentials FedEx API credentials.
 	 */
 	private function get_token( array $credentials ): string {
-		$transient_key = 'cclee_shipping_fedex_token';
+		$transient_key = 'cclee_shipping_fedex_token_' . md5( $credentials['api_key'] . $credentials['environment'] );
 		$token         = get_transient( $transient_key );
 
 		if ( false !== $token && is_string( $token ) ) {
