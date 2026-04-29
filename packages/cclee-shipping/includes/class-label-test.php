@@ -159,8 +159,8 @@ class CCLEE_Shipping_Label_Test {
 	 */
 	private function build_ship_request( array $credentials ): array {
 		return array(
-			'mergeLabelDocOption' => 'LABEL_DOCUMENT_ONLY',
-			'requestedShipment'   => array(
+			'labelResponseOptions' => 'LABEL',
+			'requestedShipment'    => array(
 				'shipper'           => array(
 					'contact'   => array(
 						'personName'  => self::TEST_ORIGIN['contact'],
@@ -195,28 +195,18 @@ class CCLEE_Shipping_Label_Test {
 				'serviceType'       => 'FEDEX_GROUND',
 				'packagingType'     => 'YOUR_PACKAGING',
 				'pickupType'        => 'DROPOFF_AT_FEDEX_LOCATION',
-				'blockInsightVisibility' => false,
-				'labelSpecification' => array(
-					'discountedPackagesFlag' => false,
-					'labelFormatType'       => 'COMMON2D',
-					'labelStockType'        => 'STOCK_4X6',
-					'imageType'             => 'PDF',
-					'printedReference'      => 'CUSTOM_REFERENCE',
-					'customerSpecifiedDetail' => array(
-						'docTabContent' => array(
-							'docTabContentType' => 'CUSTOM',
-							'zone001'          => array(
-								'docTabZoneSpecifications' => array(
-									array(
-										'zoneNumber'   => 1,
-										'header'       => 'Test Label',
-										'dataField'    => '',
-										'literalValue' => 'CCLEE Shipping Test',
-									),
-								),
-							),
+				'shippingChargesPayment' => array(
+					'paymentType' => 'SENDER',
+					'payor'       => array(
+						'responsibleParty' => array(
+							'accountNumber' => array( 'value' => $credentials['account_number'] ),
 						),
 					),
+				),
+				'labelSpecification' => array(
+					'labelFormatType' => 'COMMON2D',
+					'labelStockType'  => 'STOCK_4X6',
+					'imageType'       => 'PDF',
 				),
 				'requestedPackageLineItems' => array(
 					array(
@@ -303,21 +293,37 @@ class CCLEE_Shipping_Label_Test {
 		}
 
 		// Extract label data from response.
-		$shipments = $body['output']['transactionShipments'][0]['pieceResponses'][0] ?? null;
-		if ( empty( $shipments ) || empty( $shipments['packageLabel'] ) ) {
+		$piece = $body['output']['transactionShipments'][0]['pieceResponses'][0] ?? null;
+		if ( empty( $piece ) ) {
 			return array(
 				'success' => false,
 				'error'   => __( 'Label data not found in FedEx response.', 'cclee-shipping' ),
 			);
 		}
 
+		// Label is in packageDocuments[].encodedLabel.
+		$label_data = '';
+		foreach ( $piece['packageDocuments'] ?? array() as $doc ) {
+			if ( 'LABEL' === ( $doc['contentType'] ?? '' ) && ! empty( $doc['encodedLabel'] ) ) {
+				$label_data = $doc['encodedLabel'];
+				break;
+			}
+		}
+
+		if ( empty( $label_data ) ) {
+			return array(
+				'success' => false,
+				'error'   => __( 'Label PDF not found in FedEx response.', 'cclee-shipping' ),
+			);
+		}
+
 		$tracking_number = $body['output']['transactionShipments'][0]['masterTrackingNumber']
-			?? $shipments['trackingNumber']
+			?? $piece['trackingNumber']
 			?? '';
 
 		return array(
 			'success' => true,
-			'data'    => $shipments['packageLabel'],
+			'data'    => $label_data,
 			'tracking' => $tracking_number,
 		);
 	}
