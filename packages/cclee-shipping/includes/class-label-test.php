@@ -214,18 +214,20 @@ class CCLEE_Shipping_Label_Test {
 					),
 					'commodities' => array(
 						array(
-							'description'     => 'Soldering Products',
+							'description'          => 'Soldering Products',
 							'countryOfManufacture' => 'CN',
-							'weight'          => array(
-								'units'  => 'LB',
-								'value'  => 1.0,
+							'weight'               => array(
+								'units'  => 'KG',
+								'value'  => 0.5,
 							),
-							'quantity'        => 1,
-							'unitPrice'       => array(
+							'numberOfPieces'       => 1,
+							'quantity'             => 1,
+							'quantityUnits'        => 'PCS',
+							'unitPrice'            => array(
 								'amount'   => 10.0,
 								'currency' => 'USD',
 							),
-							'customsValue'    => array(
+							'customsValue'         => array(
 								'amount'   => 10.0,
 								'currency' => 'USD',
 							),
