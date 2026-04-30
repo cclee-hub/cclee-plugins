@@ -243,8 +243,8 @@ class CCLEE_Shipping_Label_Test {
 					array(
 						'sequenceNumber' => 1,
 						'weight'         => array(
-							'units' => 'LB',
-							'value' => 1.0,
+							'units' => 'KG',
+							'value' => 0.5,
 						),
 						'dimensions'     => array(
 							'length' => 10,
