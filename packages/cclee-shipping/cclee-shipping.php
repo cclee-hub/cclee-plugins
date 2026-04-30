@@ -3,7 +3,7 @@
  * Plugin Name: CCLEE Shipping
  * Plugin URI: https://github.com/cclee-hub/cclee-shipping
  * Description: Multi-carrier shipping for WooCommerce. FedEx + SF Express real-time rates.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Requires at least: 6.4
  * Requires PHP: 8.0
  * Author: CCLEE

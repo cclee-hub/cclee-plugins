@@ -267,18 +267,61 @@ class CCLEE_Shipping_FedEx_Carrier extends CCLEE_Shipping_Carrier_Abstract {
 
 	/**
 	 * Format cart packages for FedEx API.
+	 *
+	 * Includes dimensions when available from product data or fallback defaults.
 	 */
 	private function format_packages( array $packages ): array {
 		$items = array();
 		foreach ( $packages as $package ) {
-			$items[] = array(
+			$item = array(
 				'weight' => array( 'units' => 'LB', 'value' => $package['weight'] ),
 			);
+
+			$dims = $this->resolve_dimensions( $package );
+			if ( null !== $dims ) {
+				$item['dimensions'] = $dims;
+			}
+
+			$items[] = $item;
 		}
 		if ( empty( $items ) ) {
 			$items[] = array( 'weight' => array( 'units' => 'LB', 'value' => 1.0 ) );
 		}
 		return $items;
+	}
+
+	/**
+	 * Resolve dimensions for a package: product data first, then settings fallback.
+	 *
+	 * @param array $package Package data from CCLEE_Shipping_Package::from_cart().
+	 * @return array|null Dimensions array for FedEx API, or null if unavailable.
+	 */
+	private function resolve_dimensions( array $package ): ?array {
+		// Priority 1: dimensions aggregated from product data.
+		if ( ! empty( $package['dim_unit'] ) && ! empty( $package['length'] ) && ! empty( $package['width'] ) && ! empty( $package['height'] ) ) {
+			return array(
+				'length' => (float) $package['length'],
+				'width'  => (float) $package['width'],
+				'height' => (float) $package['height'],
+				'units'  => $package['dim_unit'],
+			);
+		}
+
+		// Priority 2: default dimensions from method settings (stored in cm).
+		$def_l = (float) $this->method->get_option( 'default_length' );
+		$def_w = (float) $this->method->get_option( 'default_width' );
+		$def_h = (float) $this->method->get_option( 'default_height' );
+
+		if ( $def_l > 0 && $def_w > 0 && $def_h > 0 ) {
+			return array(
+				'length' => $def_l,
+				'width'  => $def_w,
+				'height' => $def_h,
+				'units'  => 'CM',
+			);
+		}
+
+		return null;
 	}
 
 	/**

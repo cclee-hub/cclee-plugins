@@ -124,6 +124,23 @@ class CCLEE_Shipping_FedEx_Method extends WC_Shipping_Method {
 					'FEDEX_TUBE'     => __( 'FedEx Tube', 'cclee-shipping' ),
 				),
 			),
+			'default_length' => array(
+				'title'             => __( 'Default Package Length (cm)', 'cclee-shipping' ),
+				'type'              => 'number',
+				'custom_attributes' => array( 'step' => '0.1', 'min' => '0' ),
+				'description'       => __( 'Used when products lack dimensions. Leave empty to skip.', 'cclee-shipping' ),
+				'desc_tip'          => true,
+			),
+			'default_width' => array(
+				'title'             => __( 'Default Package Width (cm)', 'cclee-shipping' ),
+				'type'              => 'number',
+				'custom_attributes' => array( 'step' => '0.1', 'min' => '0' ),
+			),
+			'default_height' => array(
+				'title'             => __( 'Default Package Height (cm)', 'cclee-shipping' ),
+				'type'              => 'number',
+				'custom_attributes' => array( 'step' => '0.1', 'min' => '0' ),
+			),
 			'shipping_payment_type' => array(
 				'title'       => __( 'Shipping Payment Type', 'cclee-shipping' ),
 				'type'        => 'select',
