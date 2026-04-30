@@ -61,44 +61,39 @@
 		} );
 	} );
 
-	// Preview — embed PDF in iframe via data URI.
+	// Preview — show ZPL text content.
 	previewBtn.addEventListener( 'click', function() {
 		if ( ! labelData ) return;
-		var pdfSrc = 'data:application/pdf;base64,' + labelData;
-		previewFrame.src = pdfSrc;
+		var zplText = atob( labelData );
+		previewFrame.style.display = 'none';
+		var textEl = document.getElementById( 'cclee-shipping-preview-text' );
+		if ( ! textEl ) {
+			textEl = document.createElement( 'pre' );
+			textEl.id = 'cclee-shipping-preview-text';
+			textEl.style.cssText = 'background:#f0f0f1;padding:12px;max-height:600px;overflow:auto;white-space:pre-wrap;word-break:break-all;font-size:12px;border:1px solid #ccc;';
+			previewContainer.appendChild( textEl );
+		}
+		textEl.textContent = zplText;
 		previewContainer.style.display = 'block';
 	} );
 
-	// Download — trigger file download.
+	// Download — save as .zpl file.
 	downloadBtn.addEventListener( 'click', function() {
 		if ( ! labelData ) return;
-		var byteChars = atob( labelData );
-		var byteNumbers = new Array( byteChars.length );
-		for ( var i = 0; i < byteChars.length; i++ ) {
-			byteNumbers[i] = byteChars.charCodeAt( i );
-		}
-		var byteArray = new Uint8Array( byteNumbers );
-		var blob = new Blob( [ byteArray ], { type: 'application/pdf' } );
+		var zplText = atob( labelData );
+		var blob = new Blob( [ zplText ], { type: 'text/plain' } );
 		var url = URL.createObjectURL( blob );
 		var a = document.createElement( 'a' );
 		a.href = url;
-		a.download = 'fedex-test-label.pdf';
+		a.download = 'fedex-test-label.zpl';
 		document.body.appendChild( a );
 		a.click();
 		document.body.removeChild( a );
 		URL.revokeObjectURL( url );
 	} );
 
-	// Print — open PDF in new window and print.
-	printBtn.addEventListener( 'click', function() {
-		if ( ! labelData ) return;
-		var pdfSrc = 'data:application/pdf;base64,' + labelData;
-		var printWin = window.open( pdfSrc, '_blank' );
-		if ( printWin ) {
-			printWin.addEventListener( 'load', function() {
-				printWin.print();
-			} );
-		}
-	} );
+	// Print — ZPL requires thermal printer, disable button.
+	printBtn.disabled = true;
+	printBtn.title = 'ZPL labels require a thermal printer';
 
 } )();

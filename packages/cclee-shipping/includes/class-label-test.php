@@ -344,7 +344,7 @@ class CCLEE_Shipping_Label_Test {
 		if ( empty( $label_data ) ) {
 			return array(
 				'success' => false,
-				'error'   => __( 'Label PDF not found in FedEx response.', 'cclee-shipping' ),
+				'error'   => __( 'Label data not found in FedEx response.', 'cclee-shipping' ),
 			);
 		}
 
