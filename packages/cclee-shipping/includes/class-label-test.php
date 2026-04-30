@@ -237,7 +237,7 @@ class CCLEE_Shipping_Label_Test {
 				'labelSpecification' => array(
 					'labelFormatType' => 'COMMON2D',
 					'labelStockType'  => 'STOCK_4X6',
-					'imageType'       => 'PDF',
+					'imageType'       => 'ZPLII',
 				),
 				'requestedPackageLineItems' => array(
 					array(
