@@ -21,24 +21,24 @@ class CCLEE_Shipping_Label_Test {
 	 * Hardcoded test addresses for label generation.
 	 */
 	private const TEST_ORIGIN = array(
-		'contact'     => 'John Sender',
-		'company'     => 'Test Company',
-		'phone'       => '1234567890',
-		'streetLines' => array( '123 Main St' ),
-		'city'        => 'Memphis',
-		'state'       => 'TN',
-		'postcode'    => '38118',
-		'country'     => 'US',
+		'contact'     => 'Yougu Haohan',
+		'company'     => 'Zhongshan Yougu Haohan Co., Ltd.',
+		'phone'       => '+86 13622656582',
+		'streetLines' => array( 'No. 6 Gangbao Road, Dongsheng Town' ),
+		'city'        => 'Zhongshan',
+		'state'       => 'GD',
+		'postcode'    => '528411',
+		'country'     => 'CN',
 	);
 
 	private const TEST_DESTINATION = array(
-		'contact'     => 'Jane Receiver',
+		'contact'     => 'Test Receiver',
 		'company'     => 'Acme Corp',
-		'phone'       => '0987654321',
-		'streetLines' => array( '456 Oak Ave' ),
-		'city'        => 'New York',
-		'state'       => 'NY',
-		'postcode'    => '10001',
+		'phone'       => '9012637906',
+		'streetLines' => array( '3621 West Stonebridge Dr' ),
+		'city'        => 'Bartlett',
+		'state'       => 'TN',
+		'postcode'    => '38118',
 		'country'     => 'US',
 	);
 
@@ -192,7 +192,7 @@ class CCLEE_Shipping_Label_Test {
 					),
 				),
 				'shipDatestamp'     => gmdate( 'Y-m-d' ),
-				'serviceType'       => 'FEDEX_GROUND',
+				'serviceType'       => 'FEDEX_INTERNATIONAL_PRIORITY',
 				'packagingType'     => 'YOUR_PACKAGING',
 				'pickupType'        => 'DROPOFF_AT_FEDEX_LOCATION',
 				'shippingChargesPayment' => array(
@@ -200,6 +200,35 @@ class CCLEE_Shipping_Label_Test {
 					'payor'       => array(
 						'responsibleParty' => array(
 							'accountNumber' => array( 'value' => $credentials['account_number'] ),
+						),
+					),
+				),
+				'customsClearanceDetail' => array(
+					'dutiesPayment' => array(
+						'paymentType' => 'SENDER',
+						'payor'       => array(
+							'responsibleParty' => array(
+								'accountNumber' => array( 'value' => $credentials['account_number'] ),
+							),
+						),
+					),
+					'commodities' => array(
+						array(
+							'description'     => 'Soldering Products',
+							'countryOfManufacture' => 'CN',
+							'weight'          => array(
+								'units'  => 'LB',
+								'value'  => 1.0,
+							),
+							'quantity'        => 1,
+							'unitPrice'       => array(
+								'amount'   => 10.0,
+								'currency' => 'USD',
+							),
+							'customsValue'    => array(
+								'amount'   => 10.0,
+								'currency' => 'USD',
+							),
 						),
 					),
 				),
