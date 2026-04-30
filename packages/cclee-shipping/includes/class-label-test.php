@@ -247,10 +247,10 @@ class CCLEE_Shipping_Label_Test {
 							'value' => 0.5,
 						),
 						'dimensions'     => array(
-							'length' => 10,
-							'width'  => 8,
-							'height' => 4,
-							'units'  => 'IN',
+							'length' => 25,
+							'width'  => 20,
+							'height' => 10,
+							'units'  => 'CM',
 						),
 						'customerReferences' => array(
 							array(
