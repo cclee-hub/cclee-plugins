@@ -55,24 +55,42 @@ Go to Settings > CCLEE Toolkit and uncheck the module you want to disable.
 
 == External Services ==
 
-This plugin optionally connects to external AI services for content generation.
+This plugin optionally connects to external services. Each service is disabled by default and requires manual configuration.
 
-= AI Assistant / Image Alt Module =
-* Service: User-selected AI provider (OpenAI, DeepSeek, Anthropic, or custom endpoint)
-* Data Sent: User-provided prompt or image context for content generation
-* Privacy Policy (OpenAI): https://openai.com/privacy
-* Privacy Policy (Anthropic): https://www.anthropic.com/privacy
-* Opt-in: AI module is disabled by default; API key must be configured manually
+= OpenAI API (includes DeepSeek and custom OpenAI-compatible endpoints) =
+Used for AI-powered content generation, SEO meta suggestions, and image alt text generation.
+Data sent: post content, titles, selected text (only when user triggers a feature).
+Terms of Service: https://openai.com/policies/terms-of-use
+Privacy Policy: https://openai.com/privacy
+Opt-in: AI module is disabled by default; API key must be configured manually.
 
-= IndexNow =
-* Service: IndexNow protocol (Bing, Yandex, and compatible search engines)
-* Data Sent: Site URLs when content is published or updated
-* Opt-in: Disabled by default
+= Anthropic API =
+Used for AI-powered content generation, SEO meta suggestions, and image alt text generation (as an alternative AI provider).
+Data sent: post content, titles, selected text (only when user triggers a feature).
+Terms of Service: https://www.anthropic.com/policies/terms-of-use
+Privacy Policy: https://www.anthropic.com/privacy
+Opt-in: AI module is disabled by default; API key must be configured manually.
+
+= IndexNow API =
+Used to submit URLs to IndexNow-compatible search engines (Bing, Yandex, and others) for faster indexing.
+Data sent: page URLs (only when content is published/updated or manually triggered by admin).
+Terms of Service: https://www.indexnow.org/documentation
+Privacy Policy: https://www.indexnow.org/documentation
+Opt-in: Disabled by default; must be enabled in SEO settings.
 
 = Google Indexing API =
-* Service: Google Indexing API via user-provided Service Account
-* Data Sent: Site URLs for indexing requests
-* Opt-in: Disabled by default; requires Google Cloud Service Account
+Used to submit URLs to Google for faster indexing via a user-provided Service Account.
+Data sent: page URLs for indexing requests.
+Terms of Service: https://developers.google.com/terms
+Privacy Policy: https://policies.google.com/privacy
+Opt-in: Disabled by default; requires Google Cloud Service Account credentials.
+
+= Google OAuth 2.0 =
+Used to authenticate with Google Indexing API.
+Data sent: OAuth credentials (stored locally, exchanged with Google only during authorization).
+Terms of Service: https://developers.google.com/terms
+Privacy Policy: https://policies.google.com/privacy
+Opt-in: Disabled by default; requires Google Cloud Service Account credentials.
 
 == Changelog ==
 

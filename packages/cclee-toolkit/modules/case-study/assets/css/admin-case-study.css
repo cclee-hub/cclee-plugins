@@ -1,0 +1,13 @@
+/**
+ * CCLEE Toolkit Case Study Meta Box Admin Styles
+ *
+ * @package CCLEE_Toolkit
+ */
+
+.cclee-toolkit-meta-field { margin-bottom: 15px; }
+.cclee-toolkit-meta-field label { display: block; font-weight: 600; margin-bottom: 5px; }
+.cclee-toolkit-meta-field input[type="text"] { width: 100%; padding: 8px; }
+.cclee-toolkit-meta-field textarea { width: 100%; padding: 8px; min-height: 80px; }
+.cclee-toolkit-metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+.cclee-toolkit-metric-item { background: #f9f9f9; padding: 15px; border-radius: 4px; }
+.cclee-toolkit-metric-item h4 { margin: 0 0 10px 0; }

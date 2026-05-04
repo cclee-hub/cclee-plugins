@@ -442,7 +442,7 @@ function cclee_toolkit_seo_internal_links( WP_REST_Request $request ) {
 
 	$truncated = mb_substr( $content, 0, 800 );
 
-	$pages_json = wp_json_encode( $pages_list, JSON_UNESCAPED_UNICODE );
+	$pages_json = wp_json_encode( $pages_list );
 
 	$prompt = sprintf(
 		'Given the current page — Title: "%s", Content: "%s"\n\nHere is a list of published pages on this site (JSON array of {id, title, url}):\n%s\n\nRecommend up to 5 pages from the list that would make good internal links from the current page. Return a JSON array with objects containing: "post_id" (integer), "title" (string), "url" (string), "reason" (string — why this link is relevant to the current content). Return only the JSON array, no markdown, no explanation.',

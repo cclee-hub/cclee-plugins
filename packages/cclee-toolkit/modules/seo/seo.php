@@ -249,7 +249,7 @@ add_action( 'wp_head', function () {
 	echo "\n<!-- CCLEE Toolkit: JSON-LD Schema -->\n";
 	printf(
 		'<script type="application/ld+json">%s</script>' . "\n",
-		wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES )
+		wp_json_encode( $schema )
 	);
 }, 2 );
 

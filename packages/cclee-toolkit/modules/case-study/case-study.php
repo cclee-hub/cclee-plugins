@@ -151,6 +151,26 @@ function cclee_toolkit_add_case_study_meta_box() {
 add_action( 'add_meta_boxes', 'cclee_toolkit_add_case_study_meta_box' );
 
 /**
+ * Enqueue Case Study meta box styles
+ */
+function cclee_toolkit_case_study_admin_enqueue( $hook ) {
+	if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) {
+		return;
+	}
+	$screen = get_current_screen();
+	if ( ! $screen || 'case-study' !== $screen->post_type ) {
+		return;
+	}
+	wp_enqueue_style(
+		'cclee-toolkit-case-study-admin',
+		CCLEE_TOOLKIT_URL . 'modules/case-study/assets/css/admin-case-study.css',
+		array(),
+		CCLEE_TOOLKIT_VERSION
+	);
+}
+add_action( 'admin_enqueue_scripts', 'cclee_toolkit_case_study_admin_enqueue' );
+
+/**
  * 渲染 Meta Box
  */
 function cclee_toolkit_render_case_study_meta_box( $post ) {
@@ -174,16 +194,6 @@ function cclee_toolkit_render_case_study_meta_box( $post ) {
 	$testimonial_author = get_post_meta( $post->ID, 'testimonial_author', true );
 	$testimonial_title = get_post_meta( $post->ID, 'testimonial_title', true );
 	?>
-	<style>
-		.cclee-toolkit-meta-field { margin-bottom: 15px; }
-		.cclee-toolkit-meta-field label { display: block; font-weight: 600; margin-bottom: 5px; }
-		.cclee-toolkit-meta-field input[type="text"] { width: 100%; padding: 8px; }
-		.cclee-toolkit-meta-field textarea { width: 100%; padding: 8px; min-height: 80px; }
-		.cclee-toolkit-metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-		.cclee-toolkit-metric-item { background: #f9f9f9; padding: 15px; border-radius: 4px; }
-		.cclee-toolkit-metric-item h4 { margin: 0 0 10px 0; }
-	</style>
-
 	<h3><?php esc_html_e('Client Information', 'cclee-toolkit' ); ?></h3>
 	<div class="cclee-toolkit-meta-field">
 		<label for="client_name"><?php esc_html_e('Client Name', 'cclee-toolkit' ); ?></label>
@@ -241,7 +251,7 @@ function cclee_toolkit_save_case_study_meta( $post_id ) {
 		return;
 	}
 
-	if ( ! wp_verify_nonce( wp_unslash( $_POST['cclee_toolkit_case_study_meta_nonce'] ), 'cclee_toolkit_case_study_meta' ) ) {
+	if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['cclee_toolkit_case_study_meta_nonce'] ) ), 'cclee_toolkit_case_study_meta' ) ) {
 		return;
 	}
 
