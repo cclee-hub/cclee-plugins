@@ -366,7 +366,7 @@ class CCLEE_Shipping_Admin_Tools_Page {
 			'state'    => WC()->countries->get_base_state(),
 			'postcode' => WC()->countries->get_base_postcode(),
 			'country'  => WC()->countries->get_base_country(),
-			'phone'    => '',
+			'phone'    => get_option( 'woocommerce_store_phone', '' ),
 		);
 	}
 
