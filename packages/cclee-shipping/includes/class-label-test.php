@@ -18,36 +18,17 @@ class CCLEE_Shipping_Label_Test {
 	private const PRODUCTION_URL = 'https://apis.fedex.com';
 
 	/**
-	 * Hardcoded test addresses for label generation.
-	 */
-	private const TEST_ORIGIN = array(
-		'contact'     => 'Yougu Haohan',
-		'company'     => 'Zhongshan Yougu Haohan Co., Ltd.',
-		'phone'       => '+86 13622656582',
-		'streetLines' => array( 'No. 6 Gangbao Road, Dongsheng Town' ),
-		'city'        => 'Zhongshan',
-		'state'       => 'GD',
-		'postcode'    => '528411',
-		'country'     => 'CN',
-	);
-
-	private const TEST_DESTINATION = array(
-		'contact'     => 'Test Receiver',
-		'company'     => 'Acme Corp',
-		'phone'       => '9012637906',
-		'streetLines' => array( '3621 West Stonebridge Dr' ),
-		'city'        => 'Bartlett',
-		'state'       => 'TN',
-		'postcode'    => '38118',
-		'country'     => 'US',
-	);
-
-	/**
 	 * Create a test shipping label via FedEx Ship API.
 	 *
+	 * @param array $params {
+	 *     Form data from the admin page.
+	 *     @type array $sender   Sender address fields.
+	 *     @type array $receiver Recipient address fields.
+	 *     @type array $package  Package weight/dimensions.
+	 * }
 	 * @return array{ success: bool, data?: string, tracking?: string, error?: string }
 	 */
-	public function create_test_label(): array {
+	public function create_test_label( array $params ): array {
 		$credentials = $this->get_fedex_credentials();
 		if ( ! $credentials ) {
 			return array(
@@ -64,7 +45,7 @@ class CCLEE_Shipping_Label_Test {
 			);
 		}
 
-		$payload = $this->build_ship_request( $credentials );
+		$payload = $this->build_ship_request( $credentials, $params );
 		$result  = $this->call_ship_api( $token, $credentials['environment'], $payload );
 
 		if ( ! $result['success'] ) {
@@ -156,38 +137,48 @@ class CCLEE_Shipping_Label_Test {
 	 * Build FedEx Ship API request payload.
 	 *
 	 * @param array $credentials FedEx credentials.
+	 * @param array $params      Form data (sender, receiver, package).
 	 */
-	private function build_ship_request( array $credentials ): array {
+	private function build_ship_request( array $credentials, array $params ): array {
+		$sender   = $params['sender'] ?? array();
+		$receiver = $params['receiver'] ?? array();
+		$pkg      = $params['package'] ?? array();
+
+		$weight = max( (float) ( $pkg['weight'] ?? 0.5 ), 0.1 );
+		$length = max( (float) ( $pkg['length'] ?? 10 ), 1 );
+		$width  = max( (float) ( $pkg['width'] ?? 8 ), 1 );
+		$height = max( (float) ( $pkg['height'] ?? 6 ), 1 );
+
 		return array(
 			'labelResponseOptions' => 'LABEL',
 			'requestedShipment'    => array(
 				'shipper'           => array(
 					'contact'   => array(
-						'personName'  => self::TEST_ORIGIN['contact'],
-						'companyName' => self::TEST_ORIGIN['company'],
-						'phoneNumber' => self::TEST_ORIGIN['phone'],
+						'personName'  => $sender['contact'] ?? '',
+						'companyName' => $sender['company'] ?? '',
+						'phoneNumber' => $sender['phone'] ?? '',
 					),
 					'address'   => array(
-						'streetLines'         => self::TEST_ORIGIN['streetLines'],
-						'city'                => self::TEST_ORIGIN['city'],
-						'stateOrProvinceCode' => self::TEST_ORIGIN['state'],
-						'postalCode'          => self::TEST_ORIGIN['postcode'],
-						'countryCode'         => self::TEST_ORIGIN['country'],
+						'streetLines'         => array( $sender['street'] ?? '' ),
+						'city'                => $sender['city'] ?? '',
+						'stateOrProvinceCode' => $sender['state'] ?? '',
+						'postalCode'          => $sender['postcode'] ?? '',
+						'countryCode'         => strtoupper( $sender['country'] ?? '' ),
 					),
 				),
 				'recipients'        => array(
 					array(
 						'contact' => array(
-							'personName'  => self::TEST_DESTINATION['contact'],
-							'companyName' => self::TEST_DESTINATION['company'],
-							'phoneNumber' => self::TEST_DESTINATION['phone'],
+							'personName'  => $receiver['contact'] ?? '',
+							'companyName' => $receiver['company'] ?? '',
+							'phoneNumber' => $receiver['phone'] ?? '',
 						),
 						'address' => array(
-							'streetLines'         => self::TEST_DESTINATION['streetLines'],
-							'city'                => self::TEST_DESTINATION['city'],
-							'stateOrProvinceCode' => self::TEST_DESTINATION['state'],
-							'postalCode'          => self::TEST_DESTINATION['postcode'],
-							'countryCode'         => self::TEST_DESTINATION['country'],
+							'streetLines'         => array( $receiver['street'] ?? '' ),
+							'city'                => $receiver['city'] ?? '',
+							'stateOrProvinceCode' => $receiver['state'] ?? '',
+							'postalCode'          => $receiver['postcode'] ?? '',
+							'countryCode'         => strtoupper( $receiver['country'] ?? '' ),
 						),
 					),
 				),
@@ -214,11 +205,11 @@ class CCLEE_Shipping_Label_Test {
 					),
 					'commodities' => array(
 						array(
-							'description'          => 'Soldering Products',
-							'countryOfManufacture' => 'CN',
+							'description'          => 'Test Shipment',
+							'countryOfManufacture' => strtoupper( $sender['country'] ?? 'CN' ),
 							'weight'               => array(
-								'units'  => 'KG',
-								'value'  => 0.5,
+								'units' => 'LB',
+								'value' => $weight,
 							),
 							'numberOfPieces'       => 1,
 							'quantity'             => 1,
@@ -243,14 +234,14 @@ class CCLEE_Shipping_Label_Test {
 					array(
 						'sequenceNumber' => 1,
 						'weight'         => array(
-							'units' => 'KG',
-							'value' => 0.5,
+							'units' => 'LB',
+							'value' => $weight,
 						),
 						'dimensions'     => array(
-							'length' => 25,
-							'width'  => 20,
-							'height' => 10,
-							'units'  => 'CM',
+							'length' => $length,
+							'width'  => $width,
+							'height' => $height,
+							'units'  => 'IN',
 						),
 						'customerReferences' => array(
 							array(

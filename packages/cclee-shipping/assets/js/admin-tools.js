@@ -6,6 +6,7 @@
 
 	var labelData = null;
 
+	var form      = document.getElementById( 'cclee-shipping-label-form' );
 	var btn       = document.getElementById( 'cclee-shipping-generate-btn' );
 	var spinner   = document.getElementById( 'cclee-shipping-spinner' );
 	var resultDiv = document.getElementById( 'cclee-shipping-result' );
@@ -18,11 +19,12 @@
 	var previewContainer = document.getElementById( 'cclee-shipping-preview-container' );
 	var previewFrame = document.getElementById( 'cclee-shipping-preview-frame' );
 
-	if ( ! btn ) {
+	if ( ! form || ! btn ) {
 		return;
 	}
 
-	btn.addEventListener( 'click', function() {
+	form.addEventListener( 'submit', function( e ) {
+		e.preventDefault();
 		btn.disabled = true;
 		spinner.classList.add( 'is-active' );
 		resultDiv.style.display = 'block';
@@ -31,9 +33,7 @@
 		previewContainer.style.display = 'none';
 		labelData = null;
 
-		var formData = new FormData();
-		formData.append( 'action', 'cclee_shipping_test_label' );
-		formData.append( 'nonce', ccleeShippingTools.nonce );
+		var formData = new FormData( form );
 
 		fetch( ccleeShippingTools.ajax_url, {
 			method: 'POST',

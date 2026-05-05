@@ -70,6 +70,7 @@ class CCLEE_Shipping_Admin_Tools_Page {
 	 */
 	public static function render_page(): void {
 		$credentials = self::get_fedex_status();
+		$sender      = self::get_default_sender();
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Shipping Label Test', 'cclee-shipping' ); ?></h1>
@@ -91,7 +92,7 @@ class CCLEE_Shipping_Admin_Tools_Page {
 						<?php if ( $credentials['configured'] ) : ?>
 						<tr>
 							<th><?php esc_html_e( 'Environment', 'cclee-shipping' ); ?></th>
-							<td><?php echo esc_html( ucfirst( $credentials['environment'] ) ); ?></td>
+							<td><span class="cclee-shipping-env-badge cclee-shipping-env-<?php echo esc_attr( $credentials['environment'] ); ?>"><?php echo esc_html( ucfirst( $credentials['environment'] ) ); ?></span></td>
 						</tr>
 						<tr>
 							<th><?php esc_html_e( 'Account Number', 'cclee-shipping' ); ?></th>
@@ -100,20 +101,133 @@ class CCLEE_Shipping_Admin_Tools_Page {
 						<?php endif; ?>
 					</tbody>
 				</table>
+				<p class="description">
+					<?php esc_html_e( 'Environment and credentials are read from WooCommerce > Settings > Shipping > FedEx settings.', 'cclee-shipping' ); ?>
+				</p>
 			</div>
 
-			<div class="cclee-shipping-tools-action">
-				<h2><?php esc_html_e( 'Generate Test Label', 'cclee-shipping' ); ?></h2>
-				<p class="description">
-					<?php esc_html_e( 'Generate a shipping label using FedEx Ship API with hardcoded test addresses. The FedEx credentials from your shipping zone settings will be used.', 'cclee-shipping' ); ?>
-				</p>
-				<p>
-					<button type="button" id="cclee-shipping-generate-btn" class="button button-primary button-large" <?php echo $credentials['configured'] ? '' : 'disabled'; ?>>
-						<?php esc_html_e( 'Generate Test Label', 'cclee-shipping' ); ?>
-					</button>
-					<span id="cclee-shipping-spinner" class="spinner" style="float:none;"></span>
-				</p>
-			</div>
+			<form id="cclee-shipping-label-form" class="cclee-shipping-tools-form">
+				<input type="hidden" name="action" value="cclee_shipping_test_label">
+				<input type="hidden" name="nonce" value="<?php echo esc_attr( wp_create_nonce( 'cclee_shipping_test_label' ) ); ?>">
+
+				<div class="cclee-shipping-form-grid">
+					<!-- Sender -->
+					<div class="cclee-shipping-form-section">
+						<h3><?php esc_html_e( 'Sender', 'cclee-shipping' ); ?></h3>
+						<table class="form-table">
+							<tbody>
+								<tr>
+									<th><label for="sender_contact"><?php esc_html_e( 'Name', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="sender_contact" name="sender[contact]" value="<?php echo esc_attr( $sender['contact'] ); ?>" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="sender_company"><?php esc_html_e( 'Company', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="sender_company" name="sender[company]" value="<?php echo esc_attr( $sender['company'] ); ?>" class="regular-text"></td>
+								</tr>
+								<tr>
+									<th><label for="sender_street"><?php esc_html_e( 'Street', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="sender_street" name="sender[street]" value="<?php echo esc_attr( $sender['street'] ); ?>" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="sender_city"><?php esc_html_e( 'City', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="sender_city" name="sender[city]" value="<?php echo esc_attr( $sender['city'] ); ?>" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="sender_state"><?php esc_html_e( 'State / Province', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="sender_state" name="sender[state]" value="<?php echo esc_attr( $sender['state'] ); ?>" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="sender_postcode"><?php esc_html_e( 'Postal Code', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="sender_postcode" name="sender[postcode]" value="<?php echo esc_attr( $sender['postcode'] ); ?>" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="sender_country"><?php esc_html_e( 'Country', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="sender_country" name="sender[country]" value="<?php echo esc_attr( $sender['country'] ); ?>" class="small-text" maxlength="2" placeholder="US" required></td>
+								</tr>
+								<tr>
+									<th><label for="sender_phone"><?php esc_html_e( 'Phone', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="sender_phone" name="sender[phone]" value="<?php echo esc_attr( $sender['phone'] ); ?>" class="regular-text" required></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<!-- Receiver -->
+					<div class="cclee-shipping-form-section">
+						<h3><?php esc_html_e( 'Recipient', 'cclee-shipping' ); ?></h3>
+						<table class="form-table">
+							<tbody>
+								<tr>
+									<th><label for="receiver_contact"><?php esc_html_e( 'Name', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="receiver_contact" name="receiver[contact]" value="" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="receiver_company"><?php esc_html_e( 'Company', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="receiver_company" name="receiver[company]" value="" class="regular-text"></td>
+								</tr>
+								<tr>
+									<th><label for="receiver_street"><?php esc_html_e( 'Street', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="receiver_street" name="receiver[street]" value="" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="receiver_city"><?php esc_html_e( 'City', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="receiver_city" name="receiver[city]" value="" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="receiver_state"><?php esc_html_e( 'State / Province', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="receiver_state" name="receiver[state]" value="" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="receiver_postcode"><?php esc_html_e( 'Postal Code', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="receiver_postcode" name="receiver[postcode]" value="" class="regular-text" required></td>
+								</tr>
+								<tr>
+									<th><label for="receiver_country"><?php esc_html_e( 'Country', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="receiver_country" name="receiver[country]" value="" class="small-text" maxlength="2" placeholder="US" required></td>
+								</tr>
+								<tr>
+									<th><label for="receiver_phone"><?php esc_html_e( 'Phone', 'cclee-shipping' ); ?></label></th>
+									<td><input type="text" id="receiver_phone" name="receiver[phone]" value="" class="regular-text" required></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<!-- Package -->
+				<div class="cclee-shipping-form-section cclee-shipping-form-package">
+					<h3><?php esc_html_e( 'Package', 'cclee-shipping' ); ?></h3>
+					<table class="form-table">
+						<tbody>
+							<tr>
+								<th><label for="package_weight"><?php esc_html_e( 'Weight (lbs)', 'cclee-shipping' ); ?></label></th>
+								<td><input type="number" id="package_weight" name="package[weight]" value="0.5" class="small-text" step="0.1" min="0.1" required></td>
+							</tr>
+							<tr>
+								<th><label for="package_length"><?php esc_html_e( 'Length (in)', 'cclee-shipping' ); ?></label></th>
+								<td><input type="number" id="package_length" name="package[length]" value="10" class="small-text" step="0.1" min="1" required></td>
+							</tr>
+							<tr>
+								<th><label for="package_width"><?php esc_html_e( 'Width (in)', 'cclee-shipping' ); ?></label></th>
+								<td><input type="number" id="package_width" name="package[width]" value="8" class="small-text" step="0.1" min="1" required></td>
+							</tr>
+							<tr>
+								<th><label for="package_height"><?php esc_html_e( 'Height (in)', 'cclee-shipping' ); ?></label></th>
+								<td><input type="number" id="package_height" name="package[height]" value="6" class="small-text" step="0.1" min="1" required></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="cclee-shipping-tools-action">
+					<p>
+						<button type="submit" id="cclee-shipping-generate-btn" class="button button-primary button-large" <?php echo $credentials['configured'] ? '' : 'disabled'; ?>>
+							<?php esc_html_e( 'Generate Test Label', 'cclee-shipping' ); ?>
+						</button>
+						<span id="cclee-shipping-spinner" class="spinner" style="float:none;"></span>
+					</p>
+				</div>
+			</form>
 
 			<div id="cclee-shipping-result" class="cclee-shipping-tools-result" style="display:none;">
 				<h2><?php esc_html_e( 'Result', 'cclee-shipping' ); ?></h2>
@@ -163,10 +277,39 @@ class CCLEE_Shipping_Admin_Tools_Page {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'cclee-shipping' ) ) );
 		}
 
+		$params = array(
+			'sender'   => array(
+				'contact'  => sanitize_text_field( wp_unslash( $_POST['sender']['contact'] ?? '' ) ),
+				'company'  => sanitize_text_field( wp_unslash( $_POST['sender']['company'] ?? '' ) ),
+				'street'   => sanitize_text_field( wp_unslash( $_POST['sender']['street'] ?? '' ) ),
+				'city'     => sanitize_text_field( wp_unslash( $_POST['sender']['city'] ?? '' ) ),
+				'state'    => sanitize_text_field( wp_unslash( $_POST['sender']['state'] ?? '' ) ),
+				'postcode' => sanitize_text_field( wp_unslash( $_POST['sender']['postcode'] ?? '' ) ),
+				'country'  => strtoupper( sanitize_text_field( wp_unslash( $_POST['sender']['country'] ?? '' ) ) ),
+				'phone'    => sanitize_text_field( wp_unslash( $_POST['sender']['phone'] ?? '' ) ),
+			),
+			'receiver' => array(
+				'contact'  => sanitize_text_field( wp_unslash( $_POST['receiver']['contact'] ?? '' ) ),
+				'company'  => sanitize_text_field( wp_unslash( $_POST['receiver']['company'] ?? '' ) ),
+				'street'   => sanitize_text_field( wp_unslash( $_POST['receiver']['street'] ?? '' ) ),
+				'city'     => sanitize_text_field( wp_unslash( $_POST['receiver']['city'] ?? '' ) ),
+				'state'    => sanitize_text_field( wp_unslash( $_POST['receiver']['state'] ?? '' ) ),
+				'postcode' => sanitize_text_field( wp_unslash( $_POST['receiver']['postcode'] ?? '' ) ),
+				'country'  => strtoupper( sanitize_text_field( wp_unslash( $_POST['receiver']['country'] ?? '' ) ) ),
+				'phone'    => sanitize_text_field( wp_unslash( $_POST['receiver']['phone'] ?? '' ) ),
+			),
+			'package'  => array(
+				'weight' => (float) ( $_POST['package']['weight'] ?? 0.5 ),
+				'length' => (float) ( $_POST['package']['length'] ?? 10 ),
+				'width'  => (float) ( $_POST['package']['width'] ?? 8 ),
+				'height' => (float) ( $_POST['package']['height'] ?? 6 ),
+			),
+		);
+
 		require_once CCLEE_SHIPPING_PATH . 'includes/class-label-test.php';
 
-		$test  = new CCLEE_Shipping_Label_Test();
-		$result = $test->create_test_label();
+		$test   = new CCLEE_Shipping_Label_Test();
+		$result = $test->create_test_label( $params );
 
 		if ( $result['success'] ) {
 			wp_send_json_success( array(
@@ -205,6 +348,24 @@ class CCLEE_Shipping_Admin_Tools_Page {
 			'configured'     => true,
 			'environment'    => $settings['environment'] ?? 'sandbox',
 			'account_number' => $settings['account_number'] ?? '',
+		);
+	}
+
+	/**
+	 * Get default sender address from WooCommerce store settings.
+	 *
+	 * @return array Default sender fields.
+	 */
+	private static function get_default_sender(): array {
+		return array(
+			'contact'  => get_bloginfo( 'name' ),
+			'company'  => get_bloginfo( 'name' ),
+			'street'   => WC()->countries->get_base_address(),
+			'city'     => WC()->countries->get_base_city(),
+			'state'    => WC()->countries->get_base_state(),
+			'postcode' => WC()->countries->get_base_postcode(),
+			'country'  => WC()->countries->get_base_country(),
+			'phone'    => '',
 		);
 	}
 }

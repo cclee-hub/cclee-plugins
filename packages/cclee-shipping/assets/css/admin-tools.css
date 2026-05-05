@@ -4,19 +4,14 @@
 }
 
 .cclee-shipping-tools-status h2,
-.cclee-shipping-tools-action h2,
 .cclee-shipping-tools-result h2 {
 	font-size: 14px;
 	font-weight: 600;
 	margin: 16px 0 8px;
 }
 
-.cclee-shipping-tools-action {
-	margin: 20px 0;
-}
-
-.cclee-shipping-tools-action .description {
-	margin-bottom: 12px;
+.cclee-shipping-tools-status .description {
+	margin-top: 8px;
 }
 
 .cclee-shipping-status-ok {
@@ -27,6 +22,70 @@
 .cclee-shipping-status-err {
 	color: #d63638;
 	font-weight: 600;
+}
+
+.cclee-shipping-env-badge {
+	display: inline-block;
+	padding: 2px 10px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.cclee-shipping-env-sandbox {
+	background: #fff3cd;
+	color: #856404;
+	border: 1px solid #ffc107;
+}
+
+.cclee-shipping-env-production {
+	background: #d4edda;
+	color: #155724;
+	border: 1px solid #28a745;
+}
+
+/* Form grid */
+.cclee-shipping-form-grid {
+	display: flex;
+	gap: 24px;
+	flex-wrap: wrap;
+	margin-bottom: 20px;
+}
+
+.cclee-shipping-form-section {
+	flex: 1;
+	min-width: 320px;
+}
+
+.cclee-shipping-form-section h3 {
+	font-size: 14px;
+	font-weight: 600;
+	margin: 16px 0 8px;
+	padding-bottom: 6px;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.cclee-shipping-form-package {
+	max-width: 400px;
+}
+
+.cclee-shipping-form-section .form-table {
+	margin-top: 0;
+}
+
+.cclee-shipping-form-section .form-table th {
+	width: 110px;
+	padding: 6px 10px 6px 0;
+	font-weight: 400;
+}
+
+.cclee-shipping-form-section .form-table td {
+	padding: 6px 0;
+}
+
+.cclee-shipping-tools-action {
+	margin: 20px 0;
 }
 
 .cclee-shipping-label-actions {
