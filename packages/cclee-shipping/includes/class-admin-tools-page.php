@@ -71,6 +71,7 @@ class CCLEE_Shipping_Admin_Tools_Page {
 	public static function render_page(): void {
 		$credentials = self::get_fedex_status();
 		$sender      = self::get_default_sender();
+		$receiver    = self::get_default_receiver();
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Shipping Label Test', 'cclee-shipping' ); ?></h1>
@@ -159,35 +160,35 @@ class CCLEE_Shipping_Admin_Tools_Page {
 							<tbody>
 								<tr>
 									<th><label for="receiver_contact"><?php esc_html_e( 'Name', 'cclee-shipping' ); ?></label></th>
-									<td><input type="text" id="receiver_contact" name="receiver[contact]" value="" class="regular-text" required></td>
+									<td><input type="text" id="receiver_contact" name="receiver[contact]" value="<?php echo esc_attr( $receiver['contact'] ); ?>" class="regular-text" required></td>
 								</tr>
 								<tr>
 									<th><label for="receiver_company"><?php esc_html_e( 'Company', 'cclee-shipping' ); ?></label></th>
-									<td><input type="text" id="receiver_company" name="receiver[company]" value="" class="regular-text"></td>
+									<td><input type="text" id="receiver_company" name="receiver[company]" value="<?php echo esc_attr( $receiver['company'] ); ?>" class="regular-text"></td>
 								</tr>
 								<tr>
 									<th><label for="receiver_street"><?php esc_html_e( 'Street', 'cclee-shipping' ); ?></label></th>
-									<td><input type="text" id="receiver_street" name="receiver[street]" value="" class="regular-text" required></td>
+									<td><input type="text" id="receiver_street" name="receiver[street]" value="<?php echo esc_attr( $receiver['street'] ); ?>" class="regular-text" required></td>
 								</tr>
 								<tr>
 									<th><label for="receiver_city"><?php esc_html_e( 'City', 'cclee-shipping' ); ?></label></th>
-									<td><input type="text" id="receiver_city" name="receiver[city]" value="" class="regular-text" required></td>
+									<td><input type="text" id="receiver_city" name="receiver[city]" value="<?php echo esc_attr( $receiver['city'] ); ?>" class="regular-text" required></td>
 								</tr>
 								<tr>
 									<th><label for="receiver_state"><?php esc_html_e( 'State / Province', 'cclee-shipping' ); ?></label></th>
-									<td><input type="text" id="receiver_state" name="receiver[state]" value="" class="regular-text" required></td>
+									<td><input type="text" id="receiver_state" name="receiver[state]" value="<?php echo esc_attr( $receiver['state'] ); ?>" class="regular-text" required></td>
 								</tr>
 								<tr>
 									<th><label for="receiver_postcode"><?php esc_html_e( 'Postal Code', 'cclee-shipping' ); ?></label></th>
-									<td><input type="text" id="receiver_postcode" name="receiver[postcode]" value="" class="regular-text" required></td>
+									<td><input type="text" id="receiver_postcode" name="receiver[postcode]" value="<?php echo esc_attr( $receiver['postcode'] ); ?>" class="regular-text" required></td>
 								</tr>
 								<tr>
 									<th><label for="receiver_country"><?php esc_html_e( 'Country', 'cclee-shipping' ); ?></label></th>
-									<td><input type="text" id="receiver_country" name="receiver[country]" value="" class="small-text" maxlength="2" placeholder="US" required></td>
+									<td><input type="text" id="receiver_country" name="receiver[country]" value="<?php echo esc_attr( $receiver['country'] ); ?>" class="small-text" maxlength="2" placeholder="US" required></td>
 								</tr>
 								<tr>
 									<th><label for="receiver_phone"><?php esc_html_e( 'Phone', 'cclee-shipping' ); ?></label></th>
-									<td><input type="text" id="receiver_phone" name="receiver[phone]" value="" class="regular-text" required></td>
+									<td><input type="text" id="receiver_phone" name="receiver[phone]" value="<?php echo esc_attr( $receiver['phone'] ); ?>" class="regular-text" required></td>
 								</tr>
 							</tbody>
 						</table>
@@ -366,6 +367,24 @@ class CCLEE_Shipping_Admin_Tools_Page {
 			'postcode' => WC()->countries->get_base_postcode(),
 			'country'  => WC()->countries->get_base_country(),
 			'phone'    => '',
+		);
+	}
+
+	/**
+	 * Get default receiver address — FedEx sandbox test address (Memphis HQ).
+	 *
+	 * @return array Default receiver fields.
+	 */
+	private static function get_default_receiver(): array {
+		return array(
+			'contact'  => 'FedEx Sandbox Test',
+			'company'  => 'FedEx',
+			'street'   => '942 S Shady Grove Rd',
+			'city'     => 'Memphis',
+			'state'    => 'TN',
+			'postcode' => '38120',
+			'country'  => 'US',
+			'phone'    => '9012637906',
 		);
 	}
 }
