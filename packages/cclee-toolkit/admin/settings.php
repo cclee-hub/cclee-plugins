@@ -254,9 +254,13 @@ function cclee_toolkit_render_general(): void {
 		<tr>
 			<th scope="row"><?php esc_html_e( 'AI API Key', 'cclee-toolkit' ); ?></th>
 			<td>
-				<input type="password" name="cclee_toolkit_ai_api_key"
+				<input type="password" name="cclee_toolkit_ai_api_key" id="cclee_toolkit_ai_api_key"
 					value="<?php echo esc_attr( get_option( 'cclee_toolkit_ai_api_key', '' ) ); ?>"
 					class="regular-text">
+				<button type="button" class="button button-secondary" id="cclee-ai-test-btn">
+					<?php esc_html_e( 'Test Connection', 'cclee-toolkit' ); ?>
+				</button>
+				<p id="cclee-ai-test-result" style="display:none; margin-top:6px;"></p>
 				<p class="description"><?php esc_html_e( 'API Key for the selected provider below.', 'cclee-toolkit' ); ?></p>
 			</td>
 		</tr>
@@ -658,6 +662,7 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 		'restNonce'         => wp_create_nonce( 'wp_rest' ),
 		'altSaveUrl'        => esc_url( rest_url( 'cclee-toolkit/v1/seo/alt-save' ) ),
 		'altBatchUrl'       => esc_url( rest_url( 'cclee-toolkit/v1/seo/alt-batch' ) ),
+		'aiTestUrl'         => esc_url( rest_url( 'cclee-toolkit/v1/ai/test-connection' ) ),
 		'i18n'              => array(
 			'submitting'     => esc_html__( 'Submitting...', 'cclee-toolkit' ),
 			'requestFailed'  => esc_html__( 'Request failed.', 'cclee-toolkit' ),
@@ -673,6 +678,9 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 			'saving'         => esc_html__( 'Saving...', 'cclee-toolkit' ),
 			'saved'          => esc_html__( 'Saved', 'cclee-toolkit' ),
 			'failedItems'    => esc_html__( 'Failed items', 'cclee-toolkit' ),
+			'testing'        => esc_html__( 'Testing...', 'cclee-toolkit' ),
+			'testSuccess'    => esc_html__( 'Connection successful', 'cclee-toolkit' ),
+			'testFailed'     => esc_html__( 'Connection failed', 'cclee-toolkit' ),
 		),
 	) );
 } );

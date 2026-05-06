@@ -53,7 +53,115 @@ add_action( 'rest_api_init', function () {
 			return current_user_can( 'edit_posts' );
 		},
 	] );
+
+	register_rest_route( 'cclee-toolkit/v1', '/ai/test-connection', [
+		'methods'             => 'POST',
+		'callback'            => 'cclee_toolkit_ai_test_connection',
+		'permission_callback' => function () {
+			return current_user_can( 'manage_options' );
+		},
+	] );
 } );
+
+/**
+ * AI 连接测试回调
+ * 使用表单提交的值（未保存）进行测试，方便保存前验证
+ */
+function cclee_toolkit_ai_test_connection( WP_REST_Request $request ) {
+	$api_key  = $request->get_param( 'api_key' );
+	$provider = $request->get_param( 'provider' );
+	$model    = $request->get_param( 'model' );
+	$base_url = $request->get_param( 'base_url' );
+
+	if ( empty( $api_key ) ) {
+		return new WP_Error( 'no_api_key', 'API Key is required.', [ 'status' => 400 ] );
+	}
+
+	$default_models = [
+		'openai'    => 'gpt-4o-mini',
+		'deepseek'  => 'deepseek-chat',
+		'anthropic' => 'claude-haiku-4-5-20251001',
+		'custom'    => '',
+	];
+	$model = $model ?: ( $default_models[ $provider ] ?? '' );
+
+	if ( empty( $model ) ) {
+		return new WP_Error( 'no_model', 'Model name is required.', [ 'status' => 400 ] );
+	}
+
+	$start = microtime( true );
+
+	if ( $provider === 'anthropic' ) {
+		$response = wp_remote_post( 'https://api.anthropic.com/v1/messages', [
+			'headers' => [
+				'Content-Type'      => 'application/json',
+				'x-api-key'         => $api_key,
+				'anthropic-version' => '2023-06-01',
+			],
+			'body'    => json_encode( [
+				'model'      => $model,
+				'max_tokens' => 10,
+				'messages'   => [
+					[ 'role' => 'user', 'content' => 'Say hi' ],
+				],
+			] ),
+		] );
+	} else {
+		$endpoints = [
+			'openai'   => 'https://api.openai.com/v1/chat/completions',
+			'deepseek' => 'https://api.deepseek.com/v1/chat/completions',
+		];
+		$endpoint = ( $provider === 'custom' && ! empty( $base_url ) )
+			? rtrim( $base_url, '/' ) . '/chat/completions'
+			: ( $endpoints[ $provider ] ?? $endpoints['openai'] );
+
+		$response = wp_remote_post( $endpoint, [
+			'headers' => [
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'Bearer ' . $api_key,
+			],
+			'body'    => json_encode( [
+				'model'      => $model,
+				'messages'   => [
+					[ 'role' => 'user', 'content' => 'Say hi' ],
+				],
+				'max_tokens' => 10,
+			] ),
+		] );
+	}
+
+	$elapsed = round( microtime( true ) - $start, 2 );
+
+	if ( is_wp_error( $response ) ) {
+		return new WP_Error( 'connection_failed', $response->get_error_message(), [ 'status' => 502 ] );
+	}
+
+	$code = wp_remote_retrieve_response_code( $response );
+	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+	if ( $code >= 400 ) {
+		$error_msg = $body['error']['message'] ?? ( $body['error'] ?? 'Unknown error' );
+		if ( is_array( $error_msg ) ) {
+			$error_msg = wp_json_encode( $error_msg );
+		}
+		return new WP_Error( 'api_error', $error_msg, [ 'status' => $code ] );
+	}
+
+	// Extract response content based on provider
+	$content = '';
+	if ( $provider === 'anthropic' ) {
+		$content = $body['content'][0]['text'] ?? '';
+	} else {
+		$content = $body['choices'][0]['message']['content'] ?? '';
+	}
+
+	return [
+		'success'  => true,
+		'model'    => $model,
+		'content'  => $content,
+		'time'     => $elapsed . 's',
+	];
+}
 
 /**
  * AI 内容生成回调

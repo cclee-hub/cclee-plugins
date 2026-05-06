@@ -74,6 +74,59 @@
 		});
 	}
 
+	// AI Test Connection
+	var aiTestBtn = document.getElementById('cclee-ai-test-btn');
+	if (aiTestBtn) {
+		aiTestBtn.addEventListener('click', function() {
+			var apiKey   = document.getElementById('cclee_toolkit_ai_api_key').value.trim();
+			var provider = document.getElementById('cclee_toolkit_ai_provider').value;
+			var model    = document.querySelector('input[name="cclee_toolkit_ai_model"]').value.trim();
+			var baseUrl  = document.querySelector('input[name="cclee_toolkit_ai_base_url"]').value.trim();
+			var resultEl = document.getElementById('cclee-ai-test-result');
+
+			if (!apiKey) {
+				resultEl.style.display = 'block';
+				resultEl.style.color = '#d63638';
+				resultEl.textContent = 'API Key is required.';
+				return;
+			}
+
+			resultEl.style.display = 'block';
+			resultEl.style.color = '';
+			resultEl.textContent = ccleeToolkitAdmin.i18n.testing;
+			aiTestBtn.disabled = true;
+
+			jQuery.ajax({
+				url: ccleeToolkitAdmin.aiTestUrl,
+				method: 'POST',
+				beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', ccleeToolkitAdmin.restNonce); },
+				data: JSON.stringify({ api_key: apiKey, provider: provider, model: model, base_url: baseUrl }),
+				contentType: 'application/json',
+				success: function(data) {
+					aiTestBtn.disabled = false;
+					resultEl.style.color = '#00a32a';
+					var strong = document.createElement('strong');
+					strong.textContent = ccleeToolkitAdmin.i18n.testSuccess;
+					resultEl.textContent = '';
+					resultEl.appendChild(strong);
+					resultEl.appendChild(document.createTextNode(' (' + data.model + ', ' + data.time + ') \u2014 "' + data.content + '"'));
+				},
+				error: function(xhr) {
+					aiTestBtn.disabled = false;
+					resultEl.style.color = '#d63638';
+					var msg = ccleeToolkitAdmin.i18n.testFailed;
+					if (xhr.responseJSON && xhr.responseJSON.message) {
+						msg += ': ' + xhr.responseJSON.message;
+					}
+					var strong = document.createElement('strong');
+					strong.textContent = msg;
+					resultEl.textContent = '';
+					resultEl.appendChild(strong);
+				}
+			});
+		});
+	}
+
 	// Alt Batch Processing (auto-continue + result modal)
 	var batchBtn = document.getElementById('cclee-alt-batch-btn');
 	var altSaveUrl = ccleeToolkitAdmin.altSaveUrl;
