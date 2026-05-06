@@ -93,6 +93,7 @@ function cclee_toolkit_ai_test_connection( WP_REST_Request $request ) {
 
 	if ( $provider === 'anthropic' ) {
 		$response = wp_remote_post( 'https://api.anthropic.com/v1/messages', [
+			'timeout' => 30,
 			'headers' => [
 				'Content-Type'      => 'application/json',
 				'x-api-key'         => $api_key,
@@ -116,6 +117,7 @@ function cclee_toolkit_ai_test_connection( WP_REST_Request $request ) {
 			: ( $endpoints[ $provider ] ?? $endpoints['openai'] );
 
 		$response = wp_remote_post( $endpoint, [
+			'timeout' => 30,
 			'headers' => [
 				'Content-Type'  => 'application/json',
 				'Authorization' => 'Bearer ' . $api_key,
