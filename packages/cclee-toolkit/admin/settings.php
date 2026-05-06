@@ -645,7 +645,7 @@ function cclee_toolkit_render_seo(): void {
  * Enqueue admin settings JS
  */
 add_action( 'admin_enqueue_scripts', function( $hook ) {
-	if ( 'settings_page_cclee-toolkit' !== $hook ) {
+	if ( 'toplevel_page_cclee-toolkit' !== $hook ) {
 		return;
 	}
 
