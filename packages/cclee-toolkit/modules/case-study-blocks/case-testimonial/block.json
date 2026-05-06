@@ -4,6 +4,6 @@
 	"title": "Case Study Testimonial",
 	"description": "Client testimonial for case studies.",
 	"category": "cclee-toolkit",
-	"postTypes": ["case-study"],
+	"postTypes": ["cclee_case_study"],
 	"render": "file:./render.php"
 }

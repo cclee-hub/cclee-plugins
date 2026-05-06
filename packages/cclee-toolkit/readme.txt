@@ -57,18 +57,25 @@ Go to Settings > CCLEE Toolkit and uncheck the module you want to disable.
 
 This plugin optionally connects to external services. Each service is disabled by default and requires manual configuration.
 
-= OpenAI API (includes DeepSeek and custom OpenAI-compatible endpoints) =
+= OpenAI API (includes custom OpenAI-compatible endpoints) =
 Used for AI-powered content generation, SEO meta suggestions, and image alt text generation.
 Data sent: post content, titles, selected text (only when user triggers a feature).
 Terms of Service: https://openai.com/policies/terms-of-use
 Privacy Policy: https://openai.com/privacy
 Opt-in: AI module is disabled by default; API key must be configured manually.
 
+= DeepSeek API =
+Used for AI-powered SEO analysis, meta generation, alt text, and internal link suggestions.
+Data sent: post content, titles, selected text (only when user triggers the feature).
+Terms of Service: https://platform.deepseek.com/tos
+Privacy Policy: https://platform.deepseek.com/privacy_policy
+Opt-in: AI module is disabled by default; API key must be configured manually.
+
 = Anthropic API =
 Used for AI-powered content generation, SEO meta suggestions, and image alt text generation (as an alternative AI provider).
 Data sent: post content, titles, selected text (only when user triggers a feature).
-Terms of Service: https://www.anthropic.com/policies/terms-of-use
-Privacy Policy: https://www.anthropic.com/privacy
+Terms of Service: https://www.anthropic.com/legal/consumer-terms
+Privacy Policy: https://www.anthropic.com/legal/privacy
 Opt-in: AI module is disabled by default; API key must be configured manually.
 
 = IndexNow API =

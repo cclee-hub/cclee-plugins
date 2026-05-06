@@ -71,7 +71,7 @@ add_action( 'transition_post_status', function ( string $new_status, string $old
 	}
 
 	// 仅处理指定 post type
-	$allowed_types = array( 'post', 'page', 'case-study', 'product' );
+	$allowed_types = array( 'post', 'page', 'cclee_case_study', 'product' );
 	if ( ! in_array( $post->post_type, $allowed_types, true ) ) {
 		return;
 	}

@@ -4,6 +4,6 @@
 	"title": "Case Study Meta",
 	"description": "Project details bar for case studies.",
 	"category": "cclee-toolkit",
-	"postTypes": ["case-study"],
+	"postTypes": ["cclee_case_study"],
 	"render": "file:./render.php"
 }

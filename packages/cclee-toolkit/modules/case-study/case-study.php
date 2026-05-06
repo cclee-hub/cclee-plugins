@@ -37,7 +37,7 @@ function cclee_toolkit_register_case_study_cpt() {
 		'show_ui'             => true,
 		'show_in_menu'        => true,
 		'query_var'           => true,
-		'rewrite'             => array( 'slug' => 'case-study' ),
+		'rewrite'             => array( 'slug' => 'cclee_case_study' ),
 		'capability_type'     => 'post',
 		'has_archive'         => true,
 		'hierarchical'        => false,
@@ -49,10 +49,10 @@ function cclee_toolkit_register_case_study_cpt() {
 		'template_lock'       => false,
 	);
 
-	register_post_type( 'case-study', $args );
+	register_post_type( 'cclee_case_study', $args );
 
 	// 注册行业分类
-	register_taxonomy( 'case-industry', 'case-study', array(
+	register_taxonomy( 'cclee_case_industry', 'cclee_case_study', array(
 		'labels' => array(
 			'name'          => __( 'Industries', 'cclee-toolkit' ),
 			'singular_name' => __( 'Industry', 'cclee-toolkit' ),
@@ -69,28 +69,28 @@ add_action( 'init', 'cclee_toolkit_register_case_study_cpt' );
  * 注册 Case Study Meta Fields
  */
 function cclee_toolkit_register_case_study_meta() {
-	register_post_meta( 'case-study', 'client_name', array(
+	register_post_meta( 'cclee_case_study', 'client_name', array(
 		'show_in_rest'      => true,
 		'single'            => true,
 		'type'              => 'string',
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
 
-	register_post_meta( 'case-study', 'client_logo', array(
+	register_post_meta( 'cclee_case_study', 'client_logo', array(
 		'show_in_rest'      => true,
 		'single'            => true,
 		'type'              => 'integer',
 		'sanitize_callback' => 'absint',
 	) );
 
-	register_post_meta( 'case-study', 'project_duration', array(
+	register_post_meta( 'cclee_case_study', 'project_duration', array(
 		'show_in_rest'      => true,
 		'single'            => true,
 		'type'              => 'string',
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
 
-	register_post_meta( 'case-study', 'client_size', array(
+	register_post_meta( 'cclee_case_study', 'client_size', array(
 		'show_in_rest'      => true,
 		'single'            => true,
 		'type'              => 'string',
@@ -99,13 +99,13 @@ function cclee_toolkit_register_case_study_meta() {
 
 	// 成果数据（4个指标）
 	for ( $i = 1; $i <= 4; $i++ ) {
-		register_post_meta( 'case-study', "metric_{$i}_value", array(
+		register_post_meta( 'cclee_case_study', "metric_{$i}_value", array(
 			'show_in_rest'      => true,
 			'single'            => true,
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		) );
-		register_post_meta( 'case-study', "metric_{$i}_label", array(
+		register_post_meta( 'cclee_case_study', "metric_{$i}_label", array(
 			'show_in_rest'      => true,
 			'single'            => true,
 			'type'              => 'string',
@@ -114,19 +114,19 @@ function cclee_toolkit_register_case_study_meta() {
 	}
 
 	// 客户评价
-	register_post_meta( 'case-study', 'testimonial_content', array(
+	register_post_meta( 'cclee_case_study', 'testimonial_content', array(
 		'show_in_rest'      => true,
 		'single'            => true,
 		'type'              => 'string',
 		'sanitize_callback' => 'sanitize_textarea_field',
 	) );
-	register_post_meta( 'case-study', 'testimonial_author', array(
+	register_post_meta( 'cclee_case_study', 'testimonial_author', array(
 		'show_in_rest'      => true,
 		'single'            => true,
 		'type'              => 'string',
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
-	register_post_meta( 'case-study', 'testimonial_title', array(
+	register_post_meta( 'cclee_case_study', 'testimonial_title', array(
 		'show_in_rest'      => true,
 		'single'            => true,
 		'type'              => 'string',
@@ -143,7 +143,7 @@ function cclee_toolkit_add_case_study_meta_box() {
 		'cclee_toolkit_case_study_details',
 		__( 'Case Study Details', 'cclee-toolkit' ),
 		'cclee_toolkit_render_case_study_meta_box',
-		'case-study',
+		'cclee_case_study',
 		'normal',
 		'high'
 	);
@@ -158,7 +158,7 @@ function cclee_toolkit_case_study_admin_enqueue( $hook ) {
 		return;
 	}
 	$screen = get_current_screen();
-	if ( ! $screen || 'case-study' !== $screen->post_type ) {
+	if ( ! $screen || 'cclee_case_study' !== $screen->post_type ) {
 		return;
 	}
 	wp_enqueue_style(
@@ -281,7 +281,7 @@ function cclee_toolkit_save_case_study_meta( $post_id ) {
 		}
 	}
 }
-add_action( 'save_post_case-study', 'cclee_toolkit_save_case_study_meta' );
+add_action( 'save_post_cclee_case_study', 'cclee_toolkit_save_case_study_meta' );
 
 /**
  * Helper functions for templates

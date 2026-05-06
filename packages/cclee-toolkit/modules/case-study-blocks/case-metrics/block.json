@@ -4,6 +4,6 @@
 	"title": "Case Study Metrics",
 	"description": "Results metrics display for case studies.",
 	"category": "cclee-toolkit",
-	"postTypes": ["case-study"],
+	"postTypes": ["cclee_case_study"],
 	"render": "file:./render.php"
 }
