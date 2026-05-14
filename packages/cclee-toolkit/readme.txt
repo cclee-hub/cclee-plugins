@@ -122,6 +122,11 @@ Opt-in: Disabled by default; requires Google Cloud Service Account credentials.
 * SEO Enhancer (Open Graph, Twitter Card, JSON-LD)
 * Case Study CPT with industry taxonomy
 
+== Screenshots ==
+
+1. Plugin settings page with individually toggleable modules
+2. AI Assistant panel in the block editor sidebar
+
 == Upgrade Notice ==
 
 = 1.1.4 =
